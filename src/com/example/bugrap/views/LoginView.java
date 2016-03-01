@@ -1,0 +1,76 @@
+package com.example.bugrap.views;
+
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.vaadin.incubator.bugrap.model.facade.AbstractEntity;
+import com.vaadin.incubator.bugrap.model.facade.FacadeFactory;
+import com.vaadin.incubator.bugrap.model.users.Reporter;
+import com.vaadin.navigator.Navigator;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.VaadinService;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
+
+public class LoginView extends VerticalLayout implements View {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	private Navigator navigator;
+
+	public LoginView() {
+		super();
+	}
+
+	@Override
+	public void enter(ViewChangeEvent event) {
+		navigator = event.getNavigator();
+		
+		this.setMargin(true);
+		this.addComponent(createLoginForm());
+		
+		
+	}
+	
+	private FormLayout createLoginForm() {
+		final FormLayout loginForm = new FormLayout();
+		
+		final TextField usernameField = new TextField("Username");
+		final PasswordField passWordField = new PasswordField("Password");
+		
+		loginForm.addComponent(usernameField);
+		loginForm.addComponent(passWordField);
+		
+		Button button = new Button("Log in", event -> {
+			final String userName =  usernameField.getValue();
+			final String password = passWordField.getValue().trim();
+			Map<String, Object> searchParameters = Collections.unmodifiableMap(Stream.of(new AbstractMap.SimpleEntry<>("user", userName)).collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue())));
+			List<AbstractEntity> matchingUsers = FacadeFactory.getFacade().list("SELECT r FROM Reporter r WHERE r.name = :user" , searchParameters);
+			
+			//final Reporter user = FacadeUtil.getUser(userName, password);
+			//TODO: Figure out why passwordgenerator generated different hash for inputted password.
+			if(matchingUsers.isEmpty()) {
+				Notification.show("Cannot find user with provided login information!", Notification.TYPE_ERROR_MESSAGE);
+			} else {
+				getUI().getSession().setAttribute(Reporter.class, (Reporter)matchingUsers.get(0));
+				VaadinService.getCurrentRequest().getWrappedSession().setAttribute("loggedInUser", (Reporter)matchingUsers.get(0));
+				navigator.navigateTo("main");
+			}
+		});
+		loginForm.addComponent(button);
+		return loginForm;
+	}
+
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tomee>
+
+  <Resource id="default" type="DataSource">
+    JdbcDriver  = org.hsqldb.jdbcDriver
+    JdbcUrl = jdbc:hsqldb:file:/tmp/bugrap;create=true
+    UserName  =  sa
+    Password  = 
+</Resource>
+</tomee>
