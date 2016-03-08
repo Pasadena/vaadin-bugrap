@@ -1,28 +1,29 @@
 package com.example.bugrap.views;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.vaadin.alump.distributionbar.DistributionBar;
 
+import com.example.bugrap.constants.AssigneeSelections;
 import com.example.components.ProjectSelectComponent;
 import com.example.components.ProjectVersionSelectComponent;
 import com.example.components.ReportList;
+import com.example.components.ReportListFilterer;
 import com.vaadin.event.EventRouter;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
-import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.BaseTheme;
 
@@ -138,41 +139,10 @@ public class ReportsView extends VerticalLayout implements View {
 	
 	private HorizontalLayout getFilterOptionsLayout() {
 		HorizontalLayout filterOptionsLayput = new HorizontalLayout();
-		filterOptionsLayput.addComponent(new ReportListFilterer("Assignee", new Object[] {"Only me", "Everyone"}, eventRouter));
+		Map<String, Object> filterOptions = new HashMap<>();
+		filterOptions.put(AssigneeSelections.FOR_ME.getSelectionValue(), loggedInUser.getName());
+		filterOptions.put(AssigneeSelections.EVERYONE.getSelectionValue(), null);
+		filterOptionsLayput.addComponent(new ReportListFilterer("Assignee", "assigned", filterOptions, eventRouter));
 		return filterOptionsLayput;
-	}
-	
-	public class FilterChangedEvent extends Event {
-		
-		private final Object filterValue;
-		
-		public FilterChangedEvent(final Component source, Object filterValue) {
-			super(source);
-			this.filterValue = filterValue;
-		}
-
-		public Object getFilterValue() {
-			return filterValue;
-		}
-		
-	}
-	
-	public class ReportListFilterer extends CustomComponent {
-		
-		public ReportListFilterer(final String caption, final Object[] options, final EventRouter eventRouter) {
-			FormLayout filtererContainer = new FormLayout();
-			OptionGroup filterOptions = new OptionGroup(caption);
-			filterOptions.addItems(options);
-			filterOptions.addValueChangeListener(event -> {
-				eventRouter.fireEvent(new FilterChangedEvent(this, event.getProperty().getValue()));
-			});
-			filtererContainer.addComponent(filterOptions);
-			
-			filtererContainer.setSizeUndefined();
-			filterOptions.setSizeUndefined();
-			
-			setCompositionRoot(filtererContainer);
-		}
-		
 	}
 }

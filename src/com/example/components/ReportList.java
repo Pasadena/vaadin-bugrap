@@ -2,7 +2,11 @@ package com.example.components;
 
 import java.util.Locale;
 
+import com.example.events.FilterChangedEvent;
 import com.example.events.ProjectVersionSelectedEvent;
+import com.vaadin.data.Container;
+import com.vaadin.data.Item;
+import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.event.EventRouter;
@@ -15,21 +19,24 @@ import com.vaadin.ui.Table;
 @SuppressWarnings("serial")
 public class ReportList extends Table {
 	
+	private BeanItemContainer<Report> reportContainer;
+	
 	public ReportList(String title, EventRouter eventRouter) {
 		super(title);
 		this.setWidth(80, Unit.PERCENTAGE);
 		this.setContainerDataSource(getReportsContainer(null));
 		eventRouter.addListener(ProjectVersionSelectedEvent.class, this, "handleProjectVersionChange");
+		eventRouter.addListener(FilterChangedEvent.class, this, "registerListFilter");
 		this.toggleTableVisibility();
 		this.setConverter("assigned", new ReporterConverter());
 	}
 	
 	private BeanItemContainer<Report> getReportsContainer(ProjectVersion version) {
-		BeanItemContainer<Report> reportsContainer = new BeanItemContainer<>(Report.class);
+		this.reportContainer = new BeanItemContainer<>(Report.class);
 		if(version != null) {
-			reportsContainer.addAll(FacadeUtil.getReportsForVersion(version));
+			reportContainer.addAll(FacadeUtil.getReportsForVersion(version));
 		}
-		return reportsContainer;
+		return reportContainer;
 	}
 	
 	public void handleProjectVersionChange(ProjectVersionSelectedEvent event) {
@@ -46,6 +53,12 @@ public class ReportList extends Table {
 			this.setColumnHeaders("Priority", "Type", "Summary", "Assigned to", "Reported");
 			this.sort(new Object[] { "priority" }, new boolean[] { false });
 		}
+	}
+	
+	public void registerListFilter(FilterChangedEvent filterChangedEvent) {
+		this.reportContainer.removeAllContainerFilters();
+		Filter assigneeFilter = new AssigneeFilter(filterChangedEvent.getFilterName(), filterChangedEvent.getFilterValue()); 
+		this.reportContainer.addContainerFilter(assigneeFilter);
 	}
 
 	private class ReporterConverter implements Converter<String, Reporter> {
@@ -73,6 +86,35 @@ public class ReportList extends Table {
 		@Override
 		public Class<String> getPresentationType() {
 			return String.class;
+		}
+		
+	}
+	
+	private class AssigneeFilter implements Container.Filter {
+		
+		private final Object propertyId;
+		private final Object filterValue;
+		
+		public AssigneeFilter(final Object propertyId, final Object filterValue) {
+			this.propertyId = propertyId;
+			this.filterValue = filterValue;
+		}
+
+		@Override
+		public boolean passesFilter(Object itemId, Item item) throws UnsupportedOperationException {
+			if(filterValue == null) {
+				return true;
+			}
+			@SuppressWarnings("rawtypes") Property property= item.getItemProperty(this.propertyId);
+			if(property == null) {
+				return false;
+			}
+			return property.toString().contains(filterValue.toString());
+		}
+
+		@Override
+		public boolean appliesToProperty(Object propertyId) {
+			return propertyId != null && this.propertyId.equals(propertyId);
 		}
 		
 	}
