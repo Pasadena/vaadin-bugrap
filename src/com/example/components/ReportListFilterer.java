@@ -22,6 +22,7 @@ public class ReportListFilterer extends CustomComponent {
 		
 		filtererContainer.setSizeUndefined();
 		filterOptions.setSizeUndefined();
+		filterOptions.addStyleName("horizontal");
 		
 		setCompositionRoot(filtererContainer);
 	}
