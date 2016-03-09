@@ -6,6 +6,7 @@ import java.util.Map;
 import org.vaadin.alump.distributionbar.DistributionBar;
 
 import com.example.bugrap.constants.AssigneeSelections;
+import com.example.components.LoggedInUserInfo;
 import com.example.components.ProjectSelectComponent;
 import com.example.components.ProjectVersionSelectComponent;
 import com.example.components.ReportList;
@@ -15,17 +16,12 @@ import com.vaadin.incubator.bugrap.model.users.Reporter;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinService;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.BaseTheme;
 
 @SuppressWarnings("serial")
 public class ReportsView extends VerticalLayout implements View {
@@ -63,7 +59,7 @@ public class ReportsView extends VerticalLayout implements View {
 		HorizontalLayout headerLayout = new HorizontalLayout();
 		headerLayout.setWidth(100, Unit.PERCENTAGE);
 		projectSelect = new ProjectSelectComponent("", eventRouter);
-		HorizontalLayout loggedInUserComponent = getLoggedInUserInfo();
+		LoggedInUserInfo loggedInUserComponent = new LoggedInUserInfo(loggedInUser, navigator);
 		headerLayout.addComponent(projectSelect);
 		headerLayout.setComponentAlignment(projectSelect, Alignment.MIDDLE_LEFT);
 		headerLayout.addComponent(loggedInUserComponent);
@@ -73,28 +69,6 @@ public class ReportsView extends VerticalLayout implements View {
 		return headerLayout;
 	}
 	
-	private HorizontalLayout getLoggedInUserInfo() {
-		HorizontalLayout loggedInUserSection = new HorizontalLayout();
-		HorizontalLayout userInfoLayout = new HorizontalLayout();
-		loggedInUserSection.setWidth(100, Unit.PERCENTAGE);
-		Label currentUserImage = new Label(FontAwesome.USER.getHtml());
-		Label currentUserName = new Label(loggedInUser.getName());
-		currentUserImage.setContentMode(ContentMode.HTML);
-		final Button logoutButton = new Button("Logout", clickEvent -> {
-			getUI().getSession().setAttribute(Reporter.class, null);
-			navigator.navigateTo("login");
-		});
-		logoutButton.setIcon(FontAwesome.KEY);
-		logoutButton.addStyleName(BaseTheme.BUTTON_LINK);
-		userInfoLayout.addComponent(currentUserImage);
-		userInfoLayout.addComponent(currentUserName);
-		loggedInUserSection.addComponent(userInfoLayout);
-		loggedInUserSection.setComponentAlignment(userInfoLayout, Alignment.MIDDLE_LEFT);
-		loggedInUserSection.addComponent(logoutButton);
-		loggedInUserSection.setComponentAlignment(logoutButton, Alignment.MIDDLE_RIGHT);
-		return loggedInUserSection;
-	}
-	
 	private VerticalLayout getReportsSection() {
 		VerticalLayout reportSection = new VerticalLayout();
 		reportSection.setSizeFull();
@@ -102,8 +76,6 @@ public class ReportsView extends VerticalLayout implements View {
 		reportSection.addComponent(reportList);
 		return reportSection;
 	}
-	
-	
 	
 	private HorizontalLayout getVersionSelectBar() {
 		HorizontalLayout versionBar = new HorizontalLayout();

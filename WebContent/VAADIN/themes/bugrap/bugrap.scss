@@ -52,4 +52,13 @@ $v-font-family: "Open Sans", sans-serif;
   select {
   	min-width: 200px;
   }
+  
+  .button-aligned-label {
+  	position: relative;
+	text-align: center;
+	white-space: nowrap;
+	outline: none;
+	height: 37px;
+	line-height: 37px;
+  }
 }
