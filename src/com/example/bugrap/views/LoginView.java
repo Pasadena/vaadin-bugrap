@@ -49,6 +49,7 @@ public class LoginView extends VerticalLayout implements View {
 		final FormLayout loginForm = new FormLayout();
 		
 		final TextField usernameField = new TextField("Username");
+		usernameField.focus();
 		final PasswordField passWordField = new PasswordField("Password");
 		
 		loginForm.addComponent(usernameField);
