@@ -23,7 +23,7 @@ public class ReportList extends Table {
 	
 	public ReportList(String title, EventRouter eventRouter) {
 		super(title);
-		this.setWidth(80, Unit.PERCENTAGE);
+		this.setWidth(100, Unit.PERCENTAGE);
 		this.setContainerDataSource(getReportsContainer(null));
 		eventRouter.addListener(ProjectVersionSelectedEvent.class, this, "handleProjectVersionChange");
 		eventRouter.addListener(FilterChangedEvent.class, this, "registerListFilter");

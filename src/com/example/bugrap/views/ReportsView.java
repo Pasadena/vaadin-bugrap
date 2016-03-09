@@ -57,14 +57,21 @@ public class ReportsView extends VerticalLayout implements View {
 
 	private HorizontalLayout getViewHeader() {
 		HorizontalLayout headerLayout = new HorizontalLayout();
-		headerLayout.setWidth(100, Unit.PERCENTAGE);
-		projectSelect = new ProjectSelectComponent("", eventRouter);
+		FormLayout selectProjectLayout = new FormLayout();
 		LoggedInUserInfo loggedInUserComponent = new LoggedInUserInfo(loggedInUser, navigator);
-		headerLayout.addComponent(projectSelect);
-		headerLayout.setComponentAlignment(projectSelect, Alignment.MIDDLE_LEFT);
+		projectSelect = new ProjectSelectComponent("Select project: ", eventRouter);
+		
+		headerLayout.setWidth(100, Unit.PERCENTAGE);
+		
+		selectProjectLayout.addComponent(projectSelect);
+		
+		headerLayout.addComponent(selectProjectLayout);
 		headerLayout.addComponent(loggedInUserComponent);
-		headerLayout.setExpandRatio(projectSelect, 3.0f);
+		
+		headerLayout.setExpandRatio(selectProjectLayout, 3.0f);
 		headerLayout.setExpandRatio(loggedInUserComponent, 1.0f);
+		
+		headerLayout.setComponentAlignment(selectProjectLayout, Alignment.MIDDLE_LEFT);
 		headerLayout.setComponentAlignment(loggedInUserComponent, Alignment.MIDDLE_RIGHT);
 		return headerLayout;
 	}
