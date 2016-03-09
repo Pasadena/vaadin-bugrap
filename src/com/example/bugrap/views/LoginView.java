@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.incubator.bugrap.model.facade.AbstractEntity;
 import com.vaadin.incubator.bugrap.model.facade.FacadeFactory;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
@@ -69,6 +70,7 @@ public class LoginView extends VerticalLayout implements View {
 				navigator.navigateTo("main");
 			}
 		});
+		button.setClickShortcut(KeyCode.ENTER);
 		loginForm.addComponent(button);
 		return loginForm;
 	}
