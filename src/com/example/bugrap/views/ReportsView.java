@@ -22,9 +22,10 @@ import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.VerticalSplitPanel;
 
 @SuppressWarnings("serial")
-public class ReportsView extends VerticalLayout implements View {
+public class ReportsView extends VerticalSplitPanel implements View {
 
 	private Navigator navigator;
 	private Reporter loggedInUser; 
@@ -42,17 +43,23 @@ public class ReportsView extends VerticalLayout implements View {
 	public ReportsView() {
 		loggedInUser = (Reporter)VaadinService.getCurrentRequest().getWrappedSession().getAttribute("loggedInUser");
 		this.setViewProperties();
-		this.addComponent(getViewHeader());
-		this.addComponent(this.getVersionSelectBar());
-		this.addComponent(getFilterOptionsLayout());
-		this.addComponent(getReportsSection());
 		
+		VerticalLayout reportsView = new VerticalLayout();
+		VerticalLayout singleReportView = new VerticalLayout();
+		
+		reportsView.addComponent(getViewHeader());
+		reportsView.addComponent(this.getVersionSelectBar());
+		reportsView.addComponent(getFilterOptionsLayout());
+		reportsView.addComponent(getReportsSection());
+		
+		this.setFirstComponent(reportsView);
+		this.setSecondComponent(singleReportView);
 	}
 	
 	private void setViewProperties() {
-		setSizeFull();
-		setSpacing(true);
-		setMargin(true);
+		this.setSizeFull();
+		this.setSplitPosition(70, Unit.PERCENTAGE);
+		this.addStyleName("main-layout");
 	}
 
 	private HorizontalLayout getViewHeader() {
@@ -105,7 +112,7 @@ public class ReportsView extends VerticalLayout implements View {
 		distributionBar.setPartSize(1, 30.0);
 		distributionBar.setPartSize(2, 30.0);
 		//distributionBar.setSizeFull();
-		versionBar.addComponent(distributionBar);
+		//versionBar.addComponent(distributionBar);
 		return versionBar;
 	}
 	

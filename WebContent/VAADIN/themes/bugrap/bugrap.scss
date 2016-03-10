@@ -34,6 +34,14 @@ $v-font-family: "Open Sans", sans-serif;
 
   // Insert your own theme rules here
   
+  select {
+  	min-width: 200px;
+  }
+  
+  .main-layout {
+  	margin: 2% 3%;
+  }
+  
   .bar-part-first {
   	background-color: darkgrey;
   	display: inline-block;
@@ -49,9 +57,7 @@ $v-font-family: "Open Sans", sans-serif;
   	display: inline-block;
   }
   
-  select {
-  	min-width: 200px;
-  }
+  
   
   .button-aligned-label {
   	position: relative;
