@@ -1,5 +1,7 @@
 package com.example.components;
 
+import java.util.List;
+
 import com.example.events.ProjectSelectedEvent;
 import com.example.events.ProjectVersionSelectedEvent;
 import com.vaadin.data.Container;
@@ -26,13 +28,25 @@ public class ProjectVersionSelectComponent extends NativeSelect {
 	private Container getProjectVersionsContainer(final Project selectedProject) {
 		BeanItemContainer<ProjectVersion> projectVersionContainer = new BeanItemContainer<>(ProjectVersion.class);
 		if(selectedProject != null) {
-			projectVersionContainer.addAll(FacadeUtil.getVersions(selectedProject));
+			List<ProjectVersion> versionsForProject = FacadeUtil.getVersions(selectedProject);
+			if(versionsForProject.size() > 1) {
+				versionsForProject.add(0, getAllVersionsModel(selectedProject));
+			}
+			projectVersionContainer.addAll(versionsForProject);
 		}
 		return projectVersionContainer;
 	}
 	
 	public void handleProjectChange(ProjectSelectedEvent pse) {
 		this.setContainerDataSource(this.getProjectVersionsContainer(pse.getSelectedProject()));
+	}
+	
+	private static ProjectVersion getAllVersionsModel(Project selectedProject) {
+		ProjectVersion allVersionsModel = new ProjectVersion();
+		allVersionsModel.setVersion("All versions");
+		allVersionsModel.setId(-999L);
+		allVersionsModel.setProject(selectedProject);
+		return allVersionsModel;
 	}
 
 }

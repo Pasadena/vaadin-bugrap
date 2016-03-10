@@ -1,6 +1,9 @@
 package com.example.components;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import com.example.events.FilterChangedEvent;
 import com.example.events.ProjectVersionSelectedEvent;
@@ -10,7 +13,9 @@ import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.event.EventRouter;
+import com.vaadin.incubator.bugrap.model.facade.FacadeFactory;
 import com.vaadin.incubator.bugrap.model.facade.FacadeUtil;
+import com.vaadin.incubator.bugrap.model.projects.Project;
 import com.vaadin.incubator.bugrap.model.projects.ProjectVersion;
 import com.vaadin.incubator.bugrap.model.reports.Report;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
@@ -33,10 +38,23 @@ public class ReportList extends Table {
 	
 	private BeanItemContainer<Report> getReportsContainer(ProjectVersion version) {
 		this.reportContainer = new BeanItemContainer<>(Report.class);
-		if(version != null) {
+		if(version == null) {
+			return reportContainer;
+		}
+		if(version.getId() > 0) {
 			reportContainer.addAll(FacadeUtil.getReportsForVersion(version));
+		} else {
+			reportContainer.addAll(getAllReportsForProject(version.getProject()));
 		}
 		return reportContainer;
+	}
+	
+	private List<Report> getAllReportsForProject(Project project) {
+		Map<String, Object> params = new HashMap<String, Object>();
+        params.put("proj", project);
+		return FacadeFactory.getFacade()
+        .list("SELECT r FROM Report r WHERE r.project = :proj",
+                params);
 	}
 	
 	public void handleProjectVersionChange(ProjectVersionSelectedEvent event) {
