@@ -42,6 +42,11 @@ $v-font-family: "Open Sans", sans-serif;
   	margin: 2% 3%;
   }
   
+  .no-horizontal-padding {
+  	padding-left: 0px !important;
+  	padding-right: 0px !important;
+  }
+  
   .bar-part-first {
   	background-color: darkgrey;
   	display: inline-block;
@@ -56,9 +61,7 @@ $v-font-family: "Open Sans", sans-serif;
   	background-color: lightgrey;
   	display: inline-block;
   }
-  
-  
-  
+
   .button-aligned-label {
   	position: relative;
 	text-align: center;

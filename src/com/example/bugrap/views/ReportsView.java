@@ -11,6 +11,7 @@ import com.example.components.ProjectSelectComponent;
 import com.example.components.ProjectVersionSelectComponent;
 import com.example.components.ReportList;
 import com.example.components.ReportListFilterer;
+import com.example.components.report.EditReportComponent;
 import com.vaadin.event.EventRouter;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
 import com.vaadin.navigator.Navigator;
@@ -45,7 +46,6 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		this.setViewProperties();
 		
 		VerticalLayout reportsView = new VerticalLayout();
-		VerticalLayout singleReportView = new VerticalLayout();
 		
 		reportsView.addComponent(getViewHeader());
 		reportsView.addComponent(this.getVersionSelectBar());
@@ -53,7 +53,7 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		reportsView.addComponent(getReportsSection());
 		
 		this.setFirstComponent(reportsView);
-		this.setSecondComponent(singleReportView);
+		this.setSecondComponent(new EditReportComponent(eventRouter));
 	}
 	
 	private void setViewProperties() {
