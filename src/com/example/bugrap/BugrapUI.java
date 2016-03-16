@@ -7,6 +7,7 @@ import com.example.bugrap.views.LoginView;
 import com.example.bugrap.views.ReportsView;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.incubator.bugrap.DBTools;
 import com.vaadin.incubator.bugrap.model.facade.FacadeFactory;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
