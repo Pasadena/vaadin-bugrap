@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import com.example.events.ReportSelectedEvent;
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.event.EventRouter;
 import com.vaadin.incubator.bugrap.model.facade.FacadeUtil;
 import com.vaadin.incubator.bugrap.model.projects.ProjectVersion;
@@ -11,10 +12,13 @@ import com.vaadin.incubator.bugrap.model.reports.Report;
 import com.vaadin.incubator.bugrap.model.reports.ReportPriority;
 import com.vaadin.incubator.bugrap.model.reports.ReportStatus;
 import com.vaadin.incubator.bugrap.model.reports.ReportType;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
@@ -30,11 +34,15 @@ public class EditReportComponent extends CustomComponent {
 	private NativeSelect statusSelect;
 	private NativeSelect assigneeSelect;
 	
+	private Label projectNameField;
+	
+	private final BeanFieldGroup<Report> fieldGroup;
 	private Report editableReport;
 	
 	public EditReportComponent(EventRouter eventRouter) {
 		this.container = new VerticalLayout();
 		this.editableReport = null;
+		this.fieldGroup = new BeanFieldGroup<>(Report.class);
 		
 		container.setSizeUndefined();
 		container.setSpacing(true);
@@ -43,6 +51,7 @@ public class EditReportComponent extends CustomComponent {
 		
 		eventRouter.addListener(ReportSelectedEvent.class, this, "setSelectedReport");
 		
+		container.addComponent(this.createHeaderRow());
 		container.addComponent(this.createActionsBar());
 		
 		setCompositionRoot(container);
@@ -65,6 +74,22 @@ public class EditReportComponent extends CustomComponent {
 		return actionsBar;
 	}
 	
+	private HorizontalLayout createHeaderRow() {
+		HorizontalLayout header = new HorizontalLayout();
+		Link newWindowLink = new Link();
+		newWindowLink.setIcon(FontAwesome.EXTERNAL_LINK);
+		this.projectNameField = new Label("");
+		
+		newWindowLink.setSizeUndefined();
+		projectNameField.setSizeUndefined();
+		
+		header.addComponents(newWindowLink, projectNameField);
+		header.setSizeUndefined();
+		header.setSpacing(true);
+		
+		return header;
+	}
+	
 	private void createActionBarSelects() {
 		this.prioritySelect = new NativeSelect("Priority", Arrays.asList(ReportPriority.values()));
 		this.typeSelect = new NativeSelect("Type", Arrays.asList(ReportType.values()));
@@ -82,8 +107,8 @@ public class EditReportComponent extends CustomComponent {
 		Button revertButton = new Button("Revert", event -> {
 			Notification.show("It seems that this one is not implemented yet chief");
 		});
-		revertButton.addStyleName("danger");
-		updateButton.addStyleName("primary");
+		revertButton.addStyleName("danger bottom-aligned");
+		updateButton.addStyleName("primary bottom-aligned");
 		actionsBar.addComponents(updateButton, revertButton);
 	}
 	
@@ -94,8 +119,8 @@ public class EditReportComponent extends CustomComponent {
 	public void setSelectedReport(ReportSelectedEvent event) {
 		this.editableReport = event.getSelectedReport();
 		this.updateVersionList(this.editableReport);
-		this.container.setCaption(this.editableReport.getProject().getName());
-		this.updateComponentValues(this.editableReport);
+		this.projectNameField.setValue(this.editableReport.getSummary());
+		this.bindValuesToForm(this.editableReport);
 		toggleVisibility(editableReport);
 	}
 	
@@ -104,11 +129,13 @@ public class EditReportComponent extends CustomComponent {
 		this.versionSelect.addItems(FacadeUtil.getVersions(selectedReport.getProject()));
 	}
 	
-	private void updateComponentValues(final Report selectedReport) {
-		this.prioritySelect.setValue(selectedReport.getPriority());
-		this.typeSelect.setValue(selectedReport.getType());
-		this.statusSelect.setValue(selectedReport.getStatus());
-		this.assigneeSelect.setValue(selectedReport.getAssigned());
-		this.versionSelect.setValue(selectedReport.getVersion());
+	private void bindValuesToForm(final Report selectedReport) {
+		fieldGroup.setItemDataSource(selectedReport);
+		
+		fieldGroup.bind(prioritySelect, "priority");
+		fieldGroup.bind(typeSelect, "type");
+		fieldGroup.bind(statusSelect, "status");
+		fieldGroup.bind(assigneeSelect, "assigned");
+		fieldGroup.bind(versionSelect, "version");
 	}
 }
