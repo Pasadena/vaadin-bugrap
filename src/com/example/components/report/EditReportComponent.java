@@ -6,7 +6,9 @@ import java.util.List;
 
 import com.example.events.ReportSelectedEvent;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.event.EventRouter;
+import com.vaadin.incubator.bugrap.model.facade.FacadeFactory;
 import com.vaadin.incubator.bugrap.model.facade.FacadeUtil;
 import com.vaadin.incubator.bugrap.model.projects.ProjectVersion;
 import com.vaadin.incubator.bugrap.model.reports.Comment;
@@ -150,16 +152,27 @@ public class EditReportComponent extends CustomComponent {
 	}
 	
 	private void createActionBarButtons() {
-		Button updateButton = new Button("Update", event -> {
-			Notification.show("It seems that this one is not implemented yet chief");
-		});
+		Button updateButton = new Button("Update", event -> this.saveReport());
 		
-		Button revertButton = new Button("Revert", event -> {
-			Notification.show("It seems that this one is not implemented yet chief");
-		});
+		Button revertButton = new Button("Revert", event -> this.discardChanges());
 		revertButton.addStyleName("danger bottom-aligned");
 		updateButton.addStyleName("primary bottom-aligned");
 		actionsBar.addComponents(updateButton, revertButton);
+	}
+	
+	private void saveReport() {
+		try {
+			fieldGroup.commit();
+			FacadeFactory.getFacade().store(this.editableReport);
+			Notification.show("Report updated", Notification.Type.TRAY_NOTIFICATION);
+		} catch (CommitException ce) {
+			Notification.show("Something went terribly wrong! Unable to update report", Notification.Type.ERROR_MESSAGE);
+		}
+	}
+	
+	private void discardChanges() {
+		fieldGroup.discard();
+		Notification.show("Discarded all changes to this report", Notification.Type.TRAY_NOTIFICATION);
 	}
 	
 	private void toggleVisibility(Report report) {
