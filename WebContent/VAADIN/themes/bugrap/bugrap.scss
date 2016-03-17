@@ -47,6 +47,14 @@ $v-font-family: "Open Sans", sans-serif;
   	padding-right: 0px !important;
   }
   
+  .bottom-aligned {
+  	vertical-align: bottom;
+  }
+  
+  .v-slot-bottom-aligned {
+  	@extend .bottom-aligned;
+  }
+  
   .bar-part-first {
   	background-color: darkgrey;
   	display: inline-block;

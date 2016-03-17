@@ -2,12 +2,14 @@ package com.example.components.report;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.example.events.ReportSelectedEvent;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.event.EventRouter;
 import com.vaadin.incubator.bugrap.model.facade.FacadeUtil;
 import com.vaadin.incubator.bugrap.model.projects.ProjectVersion;
+import com.vaadin.incubator.bugrap.model.reports.Comment;
 import com.vaadin.incubator.bugrap.model.reports.Report;
 import com.vaadin.incubator.bugrap.model.reports.ReportPriority;
 import com.vaadin.incubator.bugrap.model.reports.ReportStatus;
@@ -21,6 +23,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
@@ -90,6 +93,28 @@ public class EditReportComponent extends CustomComponent {
 		return header;
 	}
 	
+	private VerticalLayout createCommentSection(Report selectedReport) {
+		VerticalLayout commentSection = new VerticalLayout();
+		
+		List<Comment> reportComments = FacadeUtil.getComments(selectedReport);
+		
+		for(Comment comment: reportComments) {
+			VerticalLayout singleCommentLayout = new VerticalLayout();
+			Label commentatorInfo = new Label(FontAwesome.USER.getHtml() + " " +comment.getAuthor().getName() + " (" + comment.getTimestamp().toString() + ")");
+			
+			TextArea commentArea = new TextArea();
+			commentArea.setValue(comment.getComment());
+			commentArea.setEnabled(false);
+			
+			singleCommentLayout.addComponents(commentatorInfo, commentArea);
+			
+			commentSection.addComponent(singleCommentLayout);
+		}
+		
+		commentSection.setSizeUndefined();
+		return commentSection;
+	}
+	
 	private void createActionBarSelects() {
 		this.prioritySelect = new NativeSelect("Priority", Arrays.asList(ReportPriority.values()));
 		this.typeSelect = new NativeSelect("Type", Arrays.asList(ReportType.values()));
@@ -121,6 +146,7 @@ public class EditReportComponent extends CustomComponent {
 		this.updateVersionList(this.editableReport);
 		this.projectNameField.setValue(this.editableReport.getSummary());
 		this.bindValuesToForm(this.editableReport);
+		container.addComponent(this.createCommentSection(this.editableReport));
 		toggleVisibility(editableReport);
 	}
 	
