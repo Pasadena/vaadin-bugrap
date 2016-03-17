@@ -21,6 +21,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class LoginView extends VerticalLayout implements View {
 	
@@ -72,6 +73,7 @@ public class LoginView extends VerticalLayout implements View {
 			}
 		});
 		button.setClickShortcut(KeyCode.ENTER);
+		button.addStyleName(ValoTheme.BUTTON_PRIMARY);
 		loginForm.addComponent(button);
 		return loginForm;
 	}
