@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.example.events.FilterChangedEvent;
 import com.example.events.ProjectVersionSelectedEvent;
-import com.example.events.ReportSelectedEvent;
+import com.example.events.report.ReportSelectedEvent;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
