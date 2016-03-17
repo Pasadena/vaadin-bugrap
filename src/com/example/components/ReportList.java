@@ -43,6 +43,7 @@ public class ReportList extends Table {
 	
 	private void setTableProperties() {
 		this.setWidth(90, Unit.PERCENTAGE);
+		this.setHeightUndefined();
 		
 		this.setSelectable(true);
 		this.setImmediate(true);
