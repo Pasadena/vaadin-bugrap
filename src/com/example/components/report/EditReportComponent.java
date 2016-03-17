@@ -56,7 +56,10 @@ public class EditReportComponent extends CustomComponent {
 		
 		container.addComponent(this.createHeaderRow());
 		container.addComponent(this.createActionsBar());
+		container.addComponent(this.createCommentSection(null));
+		container.addComponent(this.createAddCommentSection());
 		
+		setSizeUndefined();
 		setCompositionRoot(container);
 		toggleVisibility(editableReport);
 	}
@@ -95,6 +98,10 @@ public class EditReportComponent extends CustomComponent {
 	
 	private VerticalLayout createCommentSection(Report selectedReport) {
 		VerticalLayout commentSection = new VerticalLayout();
+		commentSection.setSizeUndefined();
+		if(selectedReport == null) {
+			return commentSection;
+		}
 		
 		List<Comment> reportComments = FacadeUtil.getComments(selectedReport);
 		
@@ -111,8 +118,26 @@ public class EditReportComponent extends CustomComponent {
 			commentSection.addComponent(singleCommentLayout);
 		}
 		
-		commentSection.setSizeUndefined();
 		return commentSection;
+	}
+	
+	public VerticalLayout createAddCommentSection() {
+		VerticalLayout addCommentsLayout = new VerticalLayout();
+		HorizontalLayout commentLayout = new HorizontalLayout();
+		HorizontalLayout commentActionsLayout = new HorizontalLayout();
+		TextArea newCommentArea = new TextArea("Add comment");
+		Button addCommentButton = new Button("Done", event -> {
+			
+		});
+		addCommentsLayout.setSizeUndefined();
+		addCommentButton.setSizeUndefined();
+		newCommentArea.setSizeUndefined();
+		
+		commentLayout.addComponent(newCommentArea);
+		commentActionsLayout.addComponent(addCommentButton);
+		addCommentsLayout.addComponents(commentLayout, commentActionsLayout);
+		
+		return addCommentsLayout;
 	}
 	
 	private void createActionBarSelects() {
@@ -146,7 +171,6 @@ public class EditReportComponent extends CustomComponent {
 		this.updateVersionList(this.editableReport);
 		this.projectNameField.setValue(this.editableReport.getSummary());
 		this.bindValuesToForm(this.editableReport);
-		container.addComponent(this.createCommentSection(this.editableReport));
 		toggleVisibility(editableReport);
 	}
 	
