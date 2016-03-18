@@ -3,7 +3,7 @@
 
   <Resource id="default" type="DataSource">
     JdbcDriver  = org.hsqldb.jdbcDriver
-    JdbcUrl = jdbc:hsqldb:file:/tmp/bugrap;create=true;lockFile=false;readonly=true
+    JdbcUrl = jdbc:hsqldb:file:/tmp/bugrap;create=true;hsqldb.lock_file=false;readonly=true
     UserName  =  sa
     Password  = 
 </Resource>
