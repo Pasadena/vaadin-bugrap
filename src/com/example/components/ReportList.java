@@ -8,6 +8,7 @@ import java.util.Map;
 import com.example.events.FilterChangedEvent;
 import com.example.events.ProjectVersionSelectedEvent;
 import com.example.events.report.ReportSelectedEvent;
+import com.example.events.report.ReportUpdatedEvent;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
@@ -29,6 +30,8 @@ public class ReportList extends Table {
 	
 	private BeanItemContainer<Report> reportContainer;
 	private final EventRouter eventRouter;
+	
+	private ProjectVersion selectedVersion;
 	
 	public ReportList(String title, EventRouter eventRouter) {
 		super(title);
@@ -83,6 +86,7 @@ public class ReportList extends Table {
 	
 	public void handleProjectVersionChange(ProjectVersionSelectedEvent event) {
 		this.setContainerDataSource(getReportsContainer(event.getProjectVersion()));
+		this.selectedVersion = event.getProjectVersion();
 		this.toggleTableVisibility();
 	}
 	
@@ -92,9 +96,19 @@ public class ReportList extends Table {
 		this.reportContainer.addContainerFilter(assigneeFilter);
 	}
 	
+	public void updateRow(final ReportUpdatedEvent event) {
+		Report updatedReport = event.getUpdatedReport();
+		if(updatedReport.getVersion().equals(this.selectedVersion)) {
+			this.refreshRowCache();			
+		} else {
+			this.reportContainer.removeItem(updatedReport);
+		}
+	}
+	
 	private void registerListeners() {
 		eventRouter.addListener(ProjectVersionSelectedEvent.class, this, "handleProjectVersionChange");
 		eventRouter.addListener(FilterChangedEvent.class, this, "registerListFilter");
+		eventRouter.addListener(ReportUpdatedEvent.class, this, "updateRow");
 		this.addItemCLickListeners();
 		this.addKeyboardEventListeners();
 	}

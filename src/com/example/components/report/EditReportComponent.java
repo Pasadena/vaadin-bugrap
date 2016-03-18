@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.example.events.report.ReportSelectedEvent;
+import com.example.events.report.ReportUpdatedEvent;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.event.EventRouter;
@@ -44,8 +45,11 @@ public class EditReportComponent extends CustomComponent {
 	private final BeanFieldGroup<Report> fieldGroup;
 	private Report editableReport;
 	
+	private final EventRouter eventRouter;
+	
 	public EditReportComponent(EventRouter eventRouter) {
 		this.container = new VerticalLayout();
+		this.eventRouter = eventRouter;
 		this.editableReport = null;
 		this.fieldGroup = new BeanFieldGroup<>(Report.class);
 		
@@ -163,8 +167,10 @@ public class EditReportComponent extends CustomComponent {
 	private void saveReport() {
 		try {
 			fieldGroup.commit();
-			FacadeFactory.getFacade().store(this.editableReport);
+			Report updated  = FacadeFactory.getFacade().store(this.editableReport);
+			this.editableReport = updated;
 			Notification.show("Report updated", Notification.Type.TRAY_NOTIFICATION);
+			eventRouter.fireEvent(new ReportUpdatedEvent(this, this.editableReport));
 		} catch (CommitException ce) {
 			Notification.show("Something went terribly wrong! Unable to update report", Notification.Type.ERROR_MESSAGE);
 		}
