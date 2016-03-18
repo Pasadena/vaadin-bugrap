@@ -78,4 +78,18 @@ $v-font-family: "Open Sans", sans-serif;
 	height: 37px;
 	line-height: 37px;
   }
+  
+  .comment-layout {
+  	margin-left: 2%;
+  	margin-bottom: 2%;
+  	background-color: white;
+  	
+  	.header {
+  		color: lightgrey;
+  	}
+  	
+  	.body {
+  		margin-left: 2%;
+  	}
+  }
 }
