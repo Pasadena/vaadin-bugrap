@@ -63,7 +63,7 @@ public class EditReportComponent extends CustomComponent {
 		container.addComponent(this.createHeaderRow());
 		container.addComponent(this.createActionsBar());
 		container.addComponent(this.createCommentSection(null));
-		container.addComponent(this.createAddCommentSection());
+		container.addComponent(new AddCommentComponent(this.editableReport));
 		
 		setSizeUndefined();
 		setCompositionRoot(container);
@@ -125,25 +125,6 @@ public class EditReportComponent extends CustomComponent {
 		}
 		
 		return commentSection;
-	}
-	
-	public VerticalLayout createAddCommentSection() {
-		VerticalLayout addCommentsLayout = new VerticalLayout();
-		HorizontalLayout commentLayout = new HorizontalLayout();
-		HorizontalLayout commentActionsLayout = new HorizontalLayout();
-		TextArea newCommentArea = new TextArea("Add comment");
-		Button addCommentButton = new Button("Done", event -> {
-			
-		});
-		addCommentsLayout.setSizeUndefined();
-		addCommentButton.setSizeUndefined();
-		newCommentArea.setSizeUndefined();
-		
-		commentLayout.addComponent(newCommentArea);
-		commentActionsLayout.addComponent(addCommentButton);
-		addCommentsLayout.addComponents(commentLayout, commentActionsLayout);
-		
-		return addCommentsLayout;
 	}
 	
 	private void createActionBarSelects() {
