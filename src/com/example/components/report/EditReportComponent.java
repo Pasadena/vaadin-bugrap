@@ -2,7 +2,6 @@ package com.example.components.report;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import com.example.events.report.ReportSelectedEvent;
 import com.example.events.report.ReportUpdatedEvent;
@@ -12,7 +11,6 @@ import com.vaadin.event.EventRouter;
 import com.vaadin.incubator.bugrap.model.facade.FacadeFactory;
 import com.vaadin.incubator.bugrap.model.facade.FacadeUtil;
 import com.vaadin.incubator.bugrap.model.projects.ProjectVersion;
-import com.vaadin.incubator.bugrap.model.reports.Comment;
 import com.vaadin.incubator.bugrap.model.reports.Report;
 import com.vaadin.incubator.bugrap.model.reports.ReportPriority;
 import com.vaadin.incubator.bugrap.model.reports.ReportStatus;
@@ -26,7 +24,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
@@ -62,8 +59,8 @@ public class EditReportComponent extends CustomComponent {
 		
 		container.addComponent(this.createHeaderRow());
 		container.addComponent(this.createActionsBar());
-		container.addComponent(this.createCommentSection(null));
-		container.addComponent(new AddCommentComponent(this.editableReport));
+		container.addComponent(new ReportCommentListComponent(this.editableReport, this.eventRouter));
+		container.addComponent(new AddCommentComponent(this.editableReport, this.eventRouter));
 		
 		setSizeUndefined();
 		setCompositionRoot(container);
@@ -100,31 +97,6 @@ public class EditReportComponent extends CustomComponent {
 		header.setSpacing(true);
 		
 		return header;
-	}
-	
-	private VerticalLayout createCommentSection(Report selectedReport) {
-		VerticalLayout commentSection = new VerticalLayout();
-		commentSection.setSizeUndefined();
-		if(selectedReport == null) {
-			return commentSection;
-		}
-		
-		List<Comment> reportComments = FacadeUtil.getComments(selectedReport);
-		
-		for(Comment comment: reportComments) {
-			VerticalLayout singleCommentLayout = new VerticalLayout();
-			Label commentatorInfo = new Label(FontAwesome.USER.getHtml() + " " +comment.getAuthor().getName() + " (" + comment.getTimestamp().toString() + ")");
-			
-			TextArea commentArea = new TextArea();
-			commentArea.setValue(comment.getComment());
-			commentArea.setEnabled(false);
-			
-			singleCommentLayout.addComponents(commentatorInfo, commentArea);
-			
-			commentSection.addComponent(singleCommentLayout);
-		}
-		
-		return commentSection;
 	}
 	
 	private void createActionBarSelects() {

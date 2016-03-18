@@ -2,7 +2,10 @@ package com.example.components.report;
 
 import java.util.Date;
 
-import com.vaadin.incubator.bugrap.model.facade.FacadeFactory;
+import com.example.events.report.CommentCreatedEvent;
+import com.example.events.report.ReportSelectedEvent;
+import com.vaadin.event.EventRouter;
+import com.vaadin.incubator.bugrap.model.facade.FacadeUtil;
 import com.vaadin.incubator.bugrap.model.reports.Comment;
 import com.vaadin.incubator.bugrap.model.reports.CommentType;
 import com.vaadin.incubator.bugrap.model.reports.Report;
@@ -23,9 +26,11 @@ public class AddCommentComponent extends CustomComponent {
 	private TextArea commentArea;
 	
 	private Report reportToComment;
+	private final EventRouter eventRouter;
 	
-	public AddCommentComponent(Report reportToComment) {
+	public AddCommentComponent(final Report reportToComment, final EventRouter eventRouter) {
 		this.reportToComment = reportToComment;
+		this.eventRouter = eventRouter;
 		this.container = new VerticalLayout();
 		this.container.setSizeUndefined();
 		this.container.setWidth(100, Unit.PERCENTAGE);
@@ -35,7 +40,13 @@ public class AddCommentComponent extends CustomComponent {
 		
 		this.toggleLayoutComponents(this.isOpen);
 		
+		eventRouter.addListener(ReportSelectedEvent.class, this, "setSelectedReport");
+		
 		setCompositionRoot(this.container);
+	}
+	
+	public void setSelectedReport(final ReportSelectedEvent event) {
+		this.reportToComment = event.getSelectedReport();
 	}
 	
 	private void createCLosedLayout() {
@@ -92,13 +103,13 @@ public class AddCommentComponent extends CustomComponent {
 	
 	private void addComment() {
 		Comment comment = new Comment();
-		comment.setId(-1);
 		comment.setComment(this.commentArea.getValue());
 		comment.setAuthor((Reporter)VaadinService.getCurrentRequest().getWrappedSession().getAttribute("loggedInUser"));
-		comment.setReport(reportToComment);
+		
 		comment.setType(CommentType.COMMENT);
 		comment.setTimestamp(new Date());
-		FacadeFactory.getFacade().store(comment);
+		comment.setReport(this.reportToComment);
+		eventRouter.fireEvent(new CommentCreatedEvent(this, FacadeUtil.store(comment)));
 		this.toggleOpen(); 
 	}
 
