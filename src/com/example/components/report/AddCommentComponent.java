@@ -74,6 +74,7 @@ public class AddCommentComponent extends CustomComponent {
 		this.commentArea = new TextArea("Add comment");
 		commentArea.setWidth(100, Unit.PERCENTAGE);
 		commentArea.setImmediate(true);
+		//TODO: This should be changed to KeyPressHAndler (etc.). This requires work on client level (?), so let's do this when we doo other gwt-related stuff.
 		commentArea.addValueChangeListener(event -> toggleCommentButtonEnabled(event.getProperty().getValue()));
 		
 		commentLayout.addComponent(commentArea);
