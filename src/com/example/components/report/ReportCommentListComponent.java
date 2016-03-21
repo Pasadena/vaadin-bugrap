@@ -71,12 +71,16 @@ public class ReportCommentListComponent extends CustomComponent {
 	
 	private VerticalLayout createSingleCommentLayout(final Comment comment) {
 		VerticalLayout singleCommentLayout = new VerticalLayout();
+		singleCommentLayout.addStyleName("comment-layout");
+		
 		Label commenterInfo = new Label(FontAwesome.USER.getHtml() + " " +comment.getAuthor().getName() + " (" + this.getTimeSincePostedString(comment.getTimestamp()) + ")");
 		commenterInfo.setContentMode(ContentMode.HTML);
+		commenterInfo.addStyleName("header");
 		
 		Label commentArea = new Label();
 		commentArea.setValue(comment.getComment());
 		commentArea.setContentMode(ContentMode.HTML);
+		commentArea.addStyleName("body");
 		
 		singleCommentLayout.addComponents(commenterInfo, commentArea);
 		return singleCommentLayout;
