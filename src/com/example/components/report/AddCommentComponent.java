@@ -24,6 +24,7 @@ public class AddCommentComponent extends CustomComponent {
 	private boolean isOpen;
 	private VerticalLayout container;
 	private TextArea commentArea;
+	private Button addCommentButton;
 	
 	private Report reportToComment;
 	private final EventRouter eventRouter;
@@ -72,17 +73,28 @@ public class AddCommentComponent extends CustomComponent {
 		
 		this.commentArea = new TextArea("Add comment");
 		commentArea.setWidth(100, Unit.PERCENTAGE);
+		commentArea.setImmediate(true);
+		commentArea.addValueChangeListener(event -> toggleCommentButtonEnabled(event.getProperty().getValue()));
 		
 		commentLayout.addComponent(commentArea);
 		return commentLayout;
+	}
+	
+	private void toggleCommentButtonEnabled(Object value) {
+		if(value != null && !value.toString().trim().isEmpty()) {
+			addCommentButton.setEnabled(true);
+		} else {
+			addCommentButton.setEnabled(false);
+		}
 	}
 	
 	private HorizontalLayout createCommentActionsLayout() {
 		HorizontalLayout commentActionsLayout = new HorizontalLayout();
 		commentActionsLayout.setSpacing(true);
 		
-		Button addCommentButton = new Button("Done", event -> this.addComment());
+		this.addCommentButton = new Button("Done", event -> this.addComment());
 		addCommentButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+		addCommentButton.setEnabled(false);
 		
 		Button cancel = new Button("Cancel", event -> this.toggleOpen());
 		cancel.addStyleName(ValoTheme.BUTTON_SMALL);
