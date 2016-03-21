@@ -7,6 +7,8 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -58,8 +60,14 @@ public class ReportCommentListComponent extends CustomComponent {
 		if(selectedReport == null) {
 			return comments;
 		}
-		//TODO: These probably need to be sorted
+
 		List<Comment> reportComments = FacadeUtil.getComments(selectedReport);
+		Collections.sort(reportComments, new Comparator<Comment>() {
+			@Override
+			public int compare(Comment first, Comment second) {
+				return first.getTimestamp().compareTo(second.getTimestamp());
+			}
+		});
 		
 		for(Comment comment: reportComments) {
 			VerticalLayout singleCommentLayout = this.createSingleCommentLayout(comment);
@@ -114,7 +122,7 @@ public class ReportCommentListComponent extends CustomComponent {
 	
 	public void addCommentToList(CommentCreatedEvent event) {
 		VerticalLayout commentLayout = this.createSingleCommentLayout(event.getCreatedComment());
-		this.commentListLayout.addComponent(commentLayout, 0);
+		this.commentListLayout.addComponent(commentLayout);
 	}
 
 }
