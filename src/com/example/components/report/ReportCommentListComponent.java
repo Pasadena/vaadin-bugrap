@@ -61,6 +61,7 @@ public class ReportCommentListComponent extends CustomComponent {
 			return comments;
 		}
 
+		//TODO: Comment can be comment or attachment, handle those two kind of things separately
 		List<Comment> reportComments = FacadeUtil.getComments(selectedReport);
 		Collections.sort(reportComments, new Comparator<Comment>() {
 			@Override
