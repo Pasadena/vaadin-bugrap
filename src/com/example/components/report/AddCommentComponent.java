@@ -2,18 +2,13 @@ package com.example.components.report;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.example.bugrap.BugrapUI;
 import com.example.events.report.CommentCreatedEvent;
 import com.example.events.report.ReportSelectedEvent;
 import com.vaadin.event.EventRouter;
@@ -23,15 +18,10 @@ import com.vaadin.incubator.bugrap.model.reports.CommentType;
 import com.vaadin.incubator.bugrap.model.reports.Report;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
 import com.vaadin.server.BrowserWindowOpener;
-import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinService;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.AbstractField;
-import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
@@ -46,12 +36,9 @@ import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.FailedEvent;
 import com.vaadin.ui.Upload.FailedListener;
 import com.vaadin.ui.Upload.ProgressListener;
-import com.vaadin.ui.Upload.StartedEvent;
-import com.vaadin.ui.Upload.StartedListener;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
@@ -155,10 +142,11 @@ public class AddCommentComponent extends CustomComponent {
 	}
 	
 	private void startUpload(final String fileName) {
-		UploadStatusComponent uploadStatus = new UploadStatusComponent(fileName, eventRouter, this.createSkeletonComment(CommentType.ATTACHMENT));
+		UI.getCurrent().setPollInterval(200);
+		
+		UploadStatusComponent uploadStatus = new UploadStatusComponent(fileName, eventRouter, this.createSkeletonComment(CommentType.ATTACHMENT), (AttachmentReceiver)attachmentUpload.getReceiver());
 		this.attachmentList.addComponent(uploadStatus);
-		UI.getCurrent().setPollInterval(100);
-		attachmentUpload.setReceiver(uploadStatus);
+
 		attachmentUpload.addFailedListener(uploadStatus);
 		attachmentUpload.addProgressListener(uploadStatus);
 		attachmentUpload.addSucceededListener(uploadStatus);
@@ -167,8 +155,7 @@ public class AddCommentComponent extends CustomComponent {
 	public void uploadSucceeded(UploadStatusComponent.UploadFinishedEvent event) {
 		UI.getCurrent().setPollInterval(-1);
 		Component component = event.getComponent();
-		
-		attachmentUpload.setReceiver(null);
+
 		this.attachmentUpload.removeProgressListener((UploadStatusComponent)component);
 		this.attachmentUpload.removeFailedListener((UploadStatusComponent)component);
 		this.attachmentUpload.removeSucceededListener((UploadStatusComponent)component);
@@ -176,6 +163,12 @@ public class AddCommentComponent extends CustomComponent {
 		this.attachmentList.replaceComponent(component, this.createUploadedFileLink(event.getComment()));
 		this.reportAttachments.add(event.getComment());
 		addCommentButton.setEnabled(true);
+		Notification.show("File " +event.getComment().getAttachmentName() + " uploaded!", Notification.Type.TRAY_NOTIFICATION);
+	}
+	
+	public void cancelUpload(UploadStatusComponent.UploadInterruptedException event) {
+		this.attachmentUpload.interruptUpload();
+		this.attachmentList.removeComponent(event.getComponent());
 	}
 	
 	private HorizontalLayout createCommentActionsLayout() {
@@ -189,26 +182,15 @@ public class AddCommentComponent extends CustomComponent {
 		this.attachmentUpload = new Upload();
 		attachmentUpload.setButtonCaption("Attachment...");
 		attachmentUpload.setImmediate(true);
-		attachmentUpload.addStartedListener(event -> {
-			startUpload(event.getFilename());
-			/**new Thread(() -> startUpload(event.getFilename())).start();
-			TestThread thred = new TestThread(attachmentList);
-			
-			attachmentUpload.addSucceededListener(thred);
-			attachmentUpload.setReceiver(thred);
-			
-			thred.start(); **/
-		});
+		attachmentUpload.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+		this.attachmentUpload.setReceiver(new AttachmentReceiver());
+		attachmentUpload.addStartedListener(event -> startUpload(event.getFilename()));
 		
 		Button cancel = new Button("Cancel", event -> this.toggleOpen());
 		cancel.addStyleName(ValoTheme.BUTTON_SMALL);
 		
 		commentActionsLayout.addComponents(addCommentButton, attachmentUpload, cancel);
 		return commentActionsLayout;
-	}
-	
-	public void cancelUpload(UploadStatusComponent.UploadInterruptedException event) {
-		this.attachmentUpload.interruptUpload();
 	}
 
 	private void toggleOpen() {
@@ -246,7 +228,7 @@ public class AddCommentComponent extends CustomComponent {
 		return comment;
 	}
 	
-	private class UploadStatusComponent extends CustomComponent implements Upload.Receiver, SucceededListener, FailedListener, ProgressListener {
+	private class UploadStatusComponent extends CustomComponent implements SucceededListener, FailedListener, ProgressListener {
 		
 		private class UploadInterruptedException extends Event {
 
@@ -275,15 +257,19 @@ public class AddCommentComponent extends CustomComponent {
 		private final ProgressBar attachmentProgress;
 		private final EventRouter eventRouter;
 		private final Comment comment;
-		private ByteArrayOutputStream uploadStream;
+		private final AttachmentReceiver receiver;
 		
-		public UploadStatusComponent(final String fileName, final EventRouter eventRouter, final Comment comment) {
+		public UploadStatusComponent(final String fileName, final EventRouter eventRouter, final Comment comment, final AttachmentReceiver receiver) {
 			this.container = new HorizontalLayout();
 			this.container.setSpacing(true);
 			this.attachmentProgress = new ProgressBar(Float.valueOf(0.0f));
+			this.attachmentProgress.addStyleName("bottom-aligned");
 			this.eventRouter = eventRouter;
 			this.fileNameField = new Label(fileName);
 			this.comment = comment;
+			this.receiver = receiver;
+			
+			this.comment.setAttachmentName(fileName);
 			
 			Button cancelUploadLink = new Button("", event -> eventRouter.fireEvent(new UploadInterruptedException(this)));
 			cancelUploadLink.setIcon(FontAwesome.REMOVE);
@@ -293,23 +279,16 @@ public class AddCommentComponent extends CustomComponent {
 			
 			this.setCompositionRoot(this.container);
 		}
-		
-		@Override
-		public OutputStream receiveUpload(String filename, String mimeType) {
-			this.comment.setAttachmentName(filename);
-			this.uploadStream = new ByteArrayOutputStream(); 
-			return uploadStream;
-		}
 
 		@Override
 		public void uploadFailed(FailedEvent event) {
 			UI.getCurrent().setPollInterval(-1);
-			Notification.show("Upload failed! Please try again", Notification.Type.ERROR_MESSAGE);
+			Notification.show("Upload interrupted", Notification.Type.TRAY_NOTIFICATION);
 		}
 
 		@Override
 		public void uploadSucceeded(SucceededEvent event) {
-			this.comment.setAttachment(uploadStream.toByteArray());
+			this.comment.setAttachment(receiver.getUploadStream().toByteArray());
 			eventRouter.fireEvent(new UploadFinishedEvent(this, this.comment));
 		}
 
@@ -317,107 +296,29 @@ public class AddCommentComponent extends CustomComponent {
 		public void updateProgress(long readBytes, long contentLength) {
 			float progress = (Long.valueOf(readBytes).floatValue() / Long.valueOf(contentLength).floatValue());
 			this.attachmentProgress.setValue(progress);
-			try {
-				Thread.sleep(200);
-			} catch (InterruptedException ie) {}
+			/**try {
+				Thread.sleep(2000);
+			} catch (InterruptedException ie) {}**/
 			
 		}
 	}
 	
-	private class AttachmentReceiver implements Upload.Receiver, SucceededListener, FailedListener {
-
+	private class AttachmentReceiver implements Upload.Receiver {
+		
 		private ByteArrayOutputStream uploadStream;
-		private final Comment comment;
 		
-		public AttachmentReceiver(final Comment comment) {
-			this.comment = comment;
+		public AttachmentReceiver() {
+			this.uploadStream = new ByteArrayOutputStream();
 		}
-		
+
 		@Override
 		public OutputStream receiveUpload(String filename, String mimeType) {
-			this.comment.setAttachmentName(filename);
-			this.uploadStream = new ByteArrayOutputStream(); 
 			return uploadStream;
 		}
-		
-		@Override
-		public void uploadSucceeded(SucceededEvent event) {
-			this.comment.setAttachment(uploadStream.toByteArray());
-		}
-		
-		@Override
-		public void uploadFailed(FailedEvent event) {
-			UI.getCurrent().setPollInterval(-1);
-			Notification.show("Upload failed! Please try again", Notification.Type.ERROR_MESSAGE);
-		}
-	}
-	
-	private class UploadThread extends Thread {
-		
-		volatile float progress = 0.0f;
-		private final AbstractField<Float> updateIndicator;
-		
-		public UploadThread(final AbstractField<Float> updatableIndicator) {
-			this.updateIndicator = updatableIndicator;
-		}
-		
-		@Override
-		public void run() {
-			
-			while(progress <= 100) {
-				progress += progress + 0.1f;
-				
-				try {
-					sleep(50);
-				} catch (InterruptedException ie) {}
-				
-				UI.getCurrent().access(new Runnable() {
-					
-					@Override
-					public void run() {
-						updateIndicator.setValue(progress);
-					}
-				});
-			}
-			
-		}
-	}
-	
-	private class TestThread extends Thread implements SucceededListener, Upload.Receiver {
-		
-		private AbstractOrderedLayout target;
-		
-		public TestThread(AbstractOrderedLayout target) {
-			this.target = target;
-		}
-		
-		@Override
-		public void run() {
-			try {
-				sleep(2000);
-			} catch (InterruptedException e) {}
-		}
 
-		@Override
-		public void uploadSucceeded(SucceededEvent event) {
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException ie) {}
-			UI.getCurrent().access(new Runnable() {
-				
-				@Override
-				public void run() {
-					target.addComponent(new Label("foo"));
-				}
-			});
-			
+		public ByteArrayOutputStream getUploadStream() {
+			return uploadStream;
 		}
-		
-		@Override
-		public OutputStream receiveUpload(String filename, String mimeType) {
-			return new ByteArrayOutputStream(); 
-		}
-		
 	}
 
 }
