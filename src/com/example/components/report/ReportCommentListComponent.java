@@ -17,6 +17,7 @@ import com.example.events.report.ReportSelectedEvent;
 import com.vaadin.event.EventRouter;
 import com.vaadin.incubator.bugrap.model.facade.FacadeUtil;
 import com.vaadin.incubator.bugrap.model.reports.Comment;
+import com.vaadin.incubator.bugrap.model.reports.CommentType;
 import com.vaadin.incubator.bugrap.model.reports.Report;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -87,7 +88,7 @@ public class ReportCommentListComponent extends CustomComponent {
 		commenterInfo.addStyleName("header");
 		
 		Label commentArea = new Label();
-		commentArea.setValue(comment.getComment());
+		commentArea.setValue(comment.getType() == CommentType.COMMENT ? comment.getComment() : comment.getAttachmentName());
 		commentArea.setContentMode(ContentMode.HTML);
 		commentArea.addStyleName("body");
 		
@@ -122,8 +123,10 @@ public class ReportCommentListComponent extends CustomComponent {
 	}
 	
 	public void addCommentToList(CommentCreatedEvent event) {
-		VerticalLayout commentLayout = this.createSingleCommentLayout(event.getCreatedComment());
-		this.commentListLayout.addComponent(commentLayout);
+		for(Comment comment: event.getCreatedComments()) {
+			VerticalLayout commentLayout = this.createSingleCommentLayout(comment);
+			this.commentListLayout.addComponent(commentLayout);
+		}
 	}
 
 }

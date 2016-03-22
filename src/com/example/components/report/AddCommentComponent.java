@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.example.bugrap.BugrapUI;
 import com.example.events.report.CommentCreatedEvent;
 import com.example.events.report.ReportSelectedEvent;
@@ -115,15 +117,13 @@ public class AddCommentComponent extends CustomComponent {
 		this.commentArea = new TextArea("Add comment");
 		commentArea.setWidth(100, Unit.PERCENTAGE);
 		commentArea.setImmediate(true);
-		//TODO: This should be changed to KeyPressHAndler (etc.). This requires work on client level (?), so let's do this when we doo other gwt-related stuff. Hint: TextChangedListener
-		commentArea.addValueChangeListener(event -> toggleCommentButtonEnabled(event.getProperty().getValue()));
-		
+		commentArea.addTextChangeListener(event -> toggleCommentButtonEnabled(event.getText()));
 		commentLayout.addComponent(commentArea);
 		return commentLayout;
 	}
 	
-	private void toggleCommentButtonEnabled(Object value) {
-		if(value != null && !value.toString().trim().isEmpty()) {
+	private void toggleCommentButtonEnabled(String value) {
+		if(!StringUtils.isBlank(value)) {
 			addCommentButton.setEnabled(true);
 		} else {
 			addCommentButton.setEnabled(false);
@@ -155,7 +155,7 @@ public class AddCommentComponent extends CustomComponent {
 	}
 	
 	private void startUpload(final String fileName) {
-		UploadStatusComponent uploadStatus = new UploadStatusComponent(fileName, eventRouter, new Comment());
+		UploadStatusComponent uploadStatus = new UploadStatusComponent(fileName, eventRouter, this.createSkeletonComment(CommentType.ATTACHMENT));
 		this.attachmentList.addComponent(uploadStatus);
 		UI.getCurrent().setPollInterval(100);
 		attachmentUpload.setReceiver(uploadStatus);
@@ -174,7 +174,8 @@ public class AddCommentComponent extends CustomComponent {
 		this.attachmentUpload.removeSucceededListener((UploadStatusComponent)component);
 		
 		this.attachmentList.replaceComponent(component, this.createUploadedFileLink(event.getComment()));
-		
+		this.reportAttachments.add(event.getComment());
+		addCommentButton.setEnabled(true);
 	}
 	
 	private HorizontalLayout createCommentActionsLayout() {
@@ -221,14 +222,28 @@ public class AddCommentComponent extends CustomComponent {
 	}
 	
 	private void addComment() {
-		Comment comment = new Comment();
-		comment.setComment(this.commentArea.getValue());
-		comment.setAuthor((Reporter)VaadinService.getCurrentRequest().getWrappedSession().getAttribute("loggedInUser"));
+		List<Comment> savedComments = new ArrayList<>();
+		if(!this.reportAttachments.isEmpty()) {
+			for(Comment comment: this.reportAttachments) {
+				savedComments.add(FacadeUtil.store(comment));
+			}
+		}
+		if(!StringUtils.isBlank(this.commentArea.getValue())) {
+			Comment comment = this.createSkeletonComment(CommentType.COMMENT);
+			comment.setComment(this.commentArea.getValue());
+			savedComments.add(FacadeUtil.store(comment));
+		}
 		
-		comment.setType(CommentType.COMMENT);
-		comment.setReport(this.reportToComment);
-		eventRouter.fireEvent(new CommentCreatedEvent(this, FacadeUtil.store(comment)));
+		eventRouter.fireEvent(new CommentCreatedEvent(this, savedComments));
 		this.toggleOpen(); 
+	}
+	
+	private Comment createSkeletonComment(final CommentType commentType) {
+		Comment comment = new Comment();
+		comment.setAuthor((Reporter)VaadinService.getCurrentRequest().getWrappedSession().getAttribute("loggedInUser"));
+		comment.setType(commentType);
+		comment.setReport(this.reportToComment);
+		return comment;
 	}
 	
 	private class UploadStatusComponent extends CustomComponent implements Upload.Receiver, SucceededListener, FailedListener, ProgressListener {

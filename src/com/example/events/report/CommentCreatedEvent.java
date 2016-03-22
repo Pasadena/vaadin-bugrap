@@ -1,5 +1,7 @@
 package com.example.events.report;
 
+import java.util.List;
+
 import com.vaadin.incubator.bugrap.model.reports.Comment;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Component.Event;
@@ -7,15 +9,15 @@ import com.vaadin.ui.Component.Event;
 @SuppressWarnings("serial")
 public class CommentCreatedEvent extends Event {
 
-	private final Comment createdComment;
+	private final List<Comment> createdComments;
 
-	public CommentCreatedEvent(Component source, Comment createdComment) {
+	public CommentCreatedEvent(Component source, final List<Comment> createdComments) {
 		super(source);
-		this.createdComment = createdComment;
+		this.createdComments = createdComments;
 	}
 
-	public Comment getCreatedComment() {
-		return createdComment;
+	public List<Comment> getCreatedComments() {
+		return createdComments;
 	}
 	
 }
