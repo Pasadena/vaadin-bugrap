@@ -45,6 +45,7 @@ public class ReportList extends Table {
 	}
 	
 	private void setTableProperties() {
+		//TODO: Set selection mode to multi
 		this.setWidth(90, Unit.PERCENTAGE);
 		this.setHeightUndefined();
 		
@@ -60,6 +61,7 @@ public class ReportList extends Table {
 		if(version.getId() > 0) {
 			reportContainer.addAll(FacadeUtil.getReportsForVersion(version));
 		} else {
+			//TODO: In this case add version-column to list
 			reportContainer.addAll(getAllReportsForProject(version.getProject()));
 		}
 		return reportContainer;
@@ -123,6 +125,7 @@ public class ReportList extends Table {
 		});
 	}
 	
+	//TODO: Get rid of these (they apply to elements to in panel or window)
 	private void addKeyboardEventListeners() {
 		this.addShortcutListener(new ShortcutListener("", KeyCode.ENTER, new int[10]) {
 			@Override

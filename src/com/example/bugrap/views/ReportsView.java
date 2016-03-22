@@ -53,6 +53,7 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		reportsView.addComponent(getReportsSection());
 		
 		this.setFirstComponent(reportsView);
+		//TODO: add second element to splitpanel only when user select something
 		this.setSecondComponent(new EditReportComponent(eventRouter));
 	}
 	
