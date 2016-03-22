@@ -124,20 +124,7 @@ public class AddCommentComponent extends CustomComponent {
 	}
 	
 	private Link createUploadedFileLink(final Comment comment) {
-		Link attachmentLink = new Link();
-		attachmentLink.setCaption(comment.getAttachmentName());
-		
-		StreamSource attachmentSource = new StreamSource() {
-			
-			@Override
-			public InputStream getStream() {
-				return new ByteArrayInputStream(comment.getAttachment());
-			}
-		};
-		StreamResource attachmentResource = new StreamResource(attachmentSource, comment.getAttachmentName()); 
-		
-		BrowserWindowOpener opener = new BrowserWindowOpener(attachmentResource);
-		opener.extend(attachmentLink);
+		Link attachmentLink = new AttachmentOpener(comment);
 		return attachmentLink;
 	}
 	

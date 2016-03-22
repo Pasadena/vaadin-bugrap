@@ -23,6 +23,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
@@ -87,13 +88,25 @@ public class ReportCommentListComponent extends CustomComponent {
 		commenterInfo.setContentMode(ContentMode.HTML);
 		commenterInfo.addStyleName("header");
 		
+		singleCommentLayout.addComponent(commenterInfo);
+		
+		if(comment.getType() == CommentType.COMMENT) {
+			singleCommentLayout.addComponent(this.createCommentTextArea(comment));
+		} else {
+			Link attachmentLink = new AttachmentOpener(comment);
+			attachmentLink.addStyleName("body");
+			singleCommentLayout.addComponent(attachmentLink);
+		}
+
+		return singleCommentLayout;
+	}
+	
+	private Label createCommentTextArea(final Comment comment) {
 		Label commentArea = new Label();
 		commentArea.setValue(comment.getType() == CommentType.COMMENT ? comment.getComment() : comment.getAttachmentName());
 		commentArea.setContentMode(ContentMode.HTML);
 		commentArea.addStyleName("body");
-		
-		singleCommentLayout.addComponents(commenterInfo, commentArea);
-		return singleCommentLayout;
+		return commentArea;
 	}
 	
 	private String getTimeSincePostedString(final Date timeOfComment) {	
