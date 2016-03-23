@@ -124,31 +124,12 @@ public class ReportList extends Table {
 			}
 		});
 	}
-	
-	//TODO: Get rid of these (they apply to elements to in panel or window)
+
 	private void addKeyboardEventListeners() {
 		this.addShortcutListener(new ShortcutListener("", KeyCode.ENTER, new int[10]) {
 			@Override
 			public void handleAction(Object sender, Object target) {
 				eventRouter.fireEvent(new ReportSelectedEvent(ReportList.this, (Report)getValue()));
-			}
-		});
-		
-		this.addShortcutListener(new ShortcutListener("", KeyCode.ARROW_UP, null) {
-			@Override
-			public void handleAction(Object sender, Object target) {
-				if(getValue() != firstItemId()) {
-					select(prevItemId(getValue()));
-				}
-			}
-		});
-		
-		this.addShortcutListener(new ShortcutListener("", KeyCode.ARROW_DOWN, null) {
-			@Override
-			public void handleAction(Object sender, Object target) {
-				if(getValue() != lastItemId()) {
-					select(nextItemId(getValue()));
-				}
 			}
 		});
 	}
