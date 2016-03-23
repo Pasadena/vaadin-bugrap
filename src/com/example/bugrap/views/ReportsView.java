@@ -12,6 +12,7 @@ import com.example.components.ProjectVersionSelectComponent;
 import com.example.components.ReportList;
 import com.example.components.ReportListFilterer;
 import com.example.components.report.EditReportComponent;
+import com.example.events.report.ReportSelectedEvent;
 import com.vaadin.event.EventRouter;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
 import com.vaadin.navigator.Navigator;
@@ -53,14 +54,18 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		reportsView.addComponent(getReportsSection());
 		
 		this.setFirstComponent(reportsView);
-		//TODO: add second element to splitpanel only when user select something
-		this.setSecondComponent(new EditReportComponent(eventRouter));
+		
+		eventRouter.addListener(ReportSelectedEvent.class, this, "setSelectedReport");
 	}
 	
 	private void setViewProperties() {
 		this.setSizeFull();
 		this.setSplitPosition(70, Unit.PERCENTAGE);
 		this.addStyleName("main-layout");
+	}
+	
+	public void setSelectedReport(ReportSelectedEvent event) {
+		this.replaceComponent(this.getSecondComponent(), new EditReportComponent(eventRouter, event.getSelectedReport(), false));
 	}
 
 	private HorizontalLayout getViewHeader() {
