@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.example.events.report.CommentCreatedEvent;
-import com.example.events.report.ReportSelectedEvent;
 import com.vaadin.event.EventRouter;
 import com.vaadin.incubator.bugrap.model.facade.FacadeUtil;
 import com.vaadin.incubator.bugrap.model.reports.Comment;
@@ -37,24 +36,13 @@ public class ReportCommentListComponent extends CustomComponent {
 		this.report = report;
 		this.commentListLayout = new VerticalLayout();
 		this.commentListLayout.setWidth(100, Unit.PERCENTAGE);
-
-		this.refreshCommentList(this.report);
+		
+		List<VerticalLayout> comments = this.createComments(this.report);
+		this.commentListLayout.addComponents(comments.toArray(new VerticalLayout[comments.size()]));
 		
 		eventRouter.addListener(CommentCreatedEvent.class, this, "addCommentToList");
-		eventRouter.addListener(ReportSelectedEvent.class, this, "setSelectedReport");
 		
 		setCompositionRoot(commentListLayout);
-	}
-	
-	public void setSelectedReport(final ReportSelectedEvent event) {
-		this.report = event.getSelectedReport();
-		this.refreshCommentList(this.report);
-	}
-	
-	private void refreshCommentList(final Report selectedReport) {
-		this.commentListLayout.removeAllComponents();
-		List<VerticalLayout> comments = this.createComments(selectedReport);
-		this.commentListLayout.addComponents(comments.toArray(new VerticalLayout[comments.size()]));
 	}
 	
 	private List<VerticalLayout> createComments(Report selectedReport) {
@@ -63,7 +51,6 @@ public class ReportCommentListComponent extends CustomComponent {
 			return comments;
 		}
 
-		//TODO: Comment can be comment or attachment, handle those two kind of things separately
 		List<Comment> reportComments = FacadeUtil.getComments(selectedReport);
 		Collections.sort(reportComments, new Comparator<Comment>() {
 			@Override

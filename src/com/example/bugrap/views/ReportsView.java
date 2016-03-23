@@ -12,6 +12,7 @@ import com.example.components.ProjectVersionSelectComponent;
 import com.example.components.ReportList;
 import com.example.components.ReportListFilterer;
 import com.example.components.report.EditReportComponent;
+import com.example.components.report.MassEditReportsComponent;
 import com.example.events.report.ReportSelectedEvent;
 import com.vaadin.event.EventRouter;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
@@ -65,7 +66,12 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	}
 	
 	public void setSelectedReport(ReportSelectedEvent event) {
-		this.replaceComponent(this.getSecondComponent(), new EditReportComponent(eventRouter, event.getSelectedReport(), false));
+		if(event.getSelectedReports().size() <= 1) {
+			this.replaceComponent(this.getSecondComponent(), new EditReportComponent(eventRouter, event.getSelectedReports().iterator().next(), false));
+		} else {
+			this.replaceComponent(this.getSecondComponent(), new MassEditReportsComponent(event.getSelectedReports()));
+		}
+		
 	}
 
 	private HorizontalLayout getViewHeader() {

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import com.example.events.FilterChangedEvent;
 import com.example.events.ProjectVersionSelectedEvent;
@@ -51,8 +52,11 @@ public class ReportList extends Table {
 		
 		this.setSelectable(true);
 		this.setImmediate(true);
-		
-		this.addValueChangeListener(event -> eventRouter.fireEvent(new ReportSelectedEvent(this, (Report)event.getProperty().getValue())));
+		this.setMultiSelect(true);
+		this.addValueChangeListener(event -> {
+			@SuppressWarnings("unchecked")Set<Report> selectedValues = (Set<Report>)event.getProperty().getValue();
+			eventRouter.fireEvent(new ReportSelectedEvent(this, selectedValues));
+		});
 	}
 	
 	private BeanItemContainer<Report> getReportsContainer(ProjectVersion version) {
@@ -120,7 +124,7 @@ public class ReportList extends Table {
 	private void addItemCLickListeners() {
 		this.addItemClickListener(event -> {
 			if(event.isDoubleClick()) {
-				eventRouter.fireEvent(new ReportSelectedEvent(this, (Report)event.getItemId()));
+				//eventRouter.fireEvent(new ReportSelectedEvent(this, (Report)event.getItemId()));
 			}
 		});
 	}
@@ -129,7 +133,7 @@ public class ReportList extends Table {
 		this.addShortcutListener(new ShortcutListener("", KeyCode.ENTER, new int[10]) {
 			@Override
 			public void handleAction(Object sender, Object target) {
-				eventRouter.fireEvent(new ReportSelectedEvent(ReportList.this, (Report)getValue()));
+				//eventRouter.fireEvent(new ReportSelectedEvent(ReportList.this, (Report)getValue()));
 			}
 		});
 	}

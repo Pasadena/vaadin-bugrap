@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.example.events.report.CommentCreatedEvent;
-import com.example.events.report.ReportSelectedEvent;
 import com.vaadin.event.EventRouter;
 import com.vaadin.incubator.bugrap.model.facade.FacadeUtil;
 import com.vaadin.incubator.bugrap.model.reports.Comment;
@@ -63,16 +62,11 @@ public class AddCommentComponent extends CustomComponent {
 		this.createAddCommentLayout();
 		
 		this.toggleLayoutComponents(this.isOpen);
-		
-		eventRouter.addListener(ReportSelectedEvent.class, this, "setSelectedReport");
+
 		eventRouter.addListener(UploadStatusComponent.UploadInterruptedException.class, this, "cancelUpload");
 		eventRouter.addListener(UploadStatusComponent.UploadFinishedEvent.class, this, "uploadSucceeded");
 		
 		setCompositionRoot(this.container);
-	}
-	
-	public void setSelectedReport(final ReportSelectedEvent event) {
-		this.reportToComment = event.getSelectedReport();
 	}
 	
 	private void createCLosedLayout() {

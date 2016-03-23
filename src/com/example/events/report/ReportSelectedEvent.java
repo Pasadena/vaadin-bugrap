@@ -1,5 +1,7 @@
 package com.example.events.report;
 
+import java.util.Set;
+
 import com.vaadin.incubator.bugrap.model.reports.Report;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Component.Event;
@@ -10,15 +12,15 @@ public class ReportSelectedEvent extends Event {
 	 * 
 	 */
 	private static final long serialVersionUID = -5842155960673831959L;
-	private final Report selectedReport;
+	private final Set<Report> selectedReports;
 
-	public ReportSelectedEvent(Component source, Report selectedReport) {
+	public ReportSelectedEvent(Component source, Set<Report> selectedReports) {
 		super(source);
-		this.selectedReport = selectedReport;
+		this.selectedReports = selectedReports;
 	}
 
-	public Report getSelectedReport() {
-		return selectedReport;
+	public Set<Report> getSelectedReports() {
+		return selectedReports;
 	}
 
 }
