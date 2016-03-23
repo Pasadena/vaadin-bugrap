@@ -3,7 +3,8 @@ package com.example.components.report;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.example.events.report.ReportSelectedEvent;
+import com.example.bugrap.SingleReportUI;
+import com.example.bugrap.util.HtmlUtils;
 import com.example.events.report.ReportUpdatedEvent;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
@@ -15,7 +16,9 @@ import com.vaadin.incubator.bugrap.model.reports.Report;
 import com.vaadin.incubator.bugrap.model.reports.ReportPriority;
 import com.vaadin.incubator.bugrap.model.reports.ReportStatus;
 import com.vaadin.incubator.bugrap.model.reports.ReportType;
+import com.vaadin.server.BrowserWindowOpener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
@@ -29,6 +32,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 public class EditReportComponent extends CustomComponent {
 	
+	public static final String REPORT_ID_PARAM = "reportId";
+	
 	private final VerticalLayout container;
 	private HorizontalLayout actionsBar;
 	private NativeSelect versionSelect;
@@ -41,30 +46,58 @@ public class EditReportComponent extends CustomComponent {
 	
 	private final BeanFieldGroup<Report> fieldGroup;
 	private Report editableReport;
+	private final boolean externalMode;
 	
 	private final EventRouter eventRouter;
 	
-	public EditReportComponent(EventRouter eventRouter) {
+	private class ReloadReportEvent extends Event {
+		
+		private final Report updatedEvent;
+
+		public ReloadReportEvent(Component source, Report updatedEvent) {
+			super(source);
+			this.updatedEvent = updatedEvent;
+		}
+
+		public Report getUpdatedEvent() {
+			return updatedEvent;
+		}
+	}
+	
+	public EditReportComponent(EventRouter eventRouter, Report selectedReport, boolean externalMode) {
 		this.container = new VerticalLayout();
 		this.eventRouter = eventRouter;
-		this.editableReport = null;
+		this.editableReport = selectedReport;
 		this.fieldGroup = new BeanFieldGroup<>(Report.class);
+		this.externalMode = externalMode;
+
+		setContainerProperties();
 		
-		container.setSizeUndefined();
-		container.setSpacing(true);
-		container.setMargin(true);
-		container.addStyleName("no-horizontal-padding");
-		
-		eventRouter.addListener(ReportSelectedEvent.class, this, "setSelectedReport");
-		
-		container.addComponent(this.createHeaderRow());
+		container.addComponent(this.createHeaderRow(externalMode));
 		container.addComponent(this.createActionsBar());
 		container.addComponent(new ReportCommentListComponent(this.editableReport, this.eventRouter));
 		container.addComponent(new AddCommentComponent(this.editableReport, this.eventRouter));
 		
+		this.bindValuesToForm(this.editableReport);
+		
+		this.eventRouter.addListener(ReloadReportEvent.class, this, "reloadReport");
+		
 		setSizeUndefined();
 		setCompositionRoot(container);
-		toggleVisibility(editableReport);
+	}
+	
+	public void reloadReport(ReloadReportEvent event) {
+		if(!event.getComponent().equals(this)) {
+			this.editableReport = event.getUpdatedEvent();
+			this.bindValuesToForm(this.editableReport);
+		}
+	}
+	
+	private void setContainerProperties() {
+		container.setSizeUndefined();
+		container.setSpacing(true);
+		container.setMargin(true);
+		container.addStyleName("no-horizontal-padding");
 	}
 	
 	private HorizontalLayout createActionsBar() {
@@ -83,20 +116,32 @@ public class EditReportComponent extends CustomComponent {
 		return actionsBar;
 	}
 	
-	private HorizontalLayout createHeaderRow() {
+	private HorizontalLayout createHeaderRow(boolean externalMode) {
 		HorizontalLayout header = new HorizontalLayout();
-		Link newWindowLink = new Link();
-		newWindowLink.setIcon(FontAwesome.EXTERNAL_LINK);
-		this.projectNameField = new Label("");
+		if(!externalMode) {
+			header.addComponent(this.createOpenInNewWindowLink());
+		}
 		
-		newWindowLink.setSizeUndefined();
+		this.projectNameField = HtmlUtils.createHeader(this.editableReport.getSummary(), 3);
 		projectNameField.setSizeUndefined();
 		
-		header.addComponents(newWindowLink, projectNameField);
+		header.addComponent(projectNameField);
 		header.setSizeUndefined();
 		header.setSpacing(true);
 		
 		return header;
+	}
+	
+	private Link createOpenInNewWindowLink() {
+		Link newWindowLink = new Link();
+		newWindowLink.setIcon(FontAwesome.EXTERNAL_LINK);
+		newWindowLink.setSizeUndefined();
+		
+		BrowserWindowOpener opener = new BrowserWindowOpener(SingleReportUI.class);
+		opener.extend(newWindowLink);
+		opener.setParameter(REPORT_ID_PARAM, String.valueOf(this.editableReport.getId()));
+		VaadinService.getCurrentRequest().getWrappedSession().setAttribute("eventRouter", this.eventRouter);
+		return newWindowLink;
 	}
 	
 	private void createActionBarSelects() {
@@ -120,10 +165,12 @@ public class EditReportComponent extends CustomComponent {
 	private void saveReport() {
 		try {
 			fieldGroup.commit();
-			Report updated  = FacadeFactory.getFacade().store(this.editableReport);
-			this.editableReport = updated;
 			Notification.show("Report updated", Notification.Type.TRAY_NOTIFICATION);
+			this.editableReport = FacadeFactory.getFacade().store(this.editableReport);
 			eventRouter.fireEvent(new ReportUpdatedEvent(this, this.editableReport));
+			if(this.externalMode) {
+				eventRouter.fireEvent(new ReloadReportEvent(this, this.editableReport));
+			}
 		} catch (CommitException ce) {
 			Notification.show("Something went terribly wrong! Unable to update report", Notification.Type.ERROR_MESSAGE);
 		}
@@ -132,23 +179,6 @@ public class EditReportComponent extends CustomComponent {
 	private void discardChanges() {
 		fieldGroup.discard();
 		Notification.show("Discarded all changes to this report", Notification.Type.TRAY_NOTIFICATION);
-	}
-	
-	private void toggleVisibility(Report report) {
-		this.setVisible(report != null);
-	}
-	
-	public void setSelectedReport(ReportSelectedEvent event) {
-		this.editableReport = event.getSelectedReport();
-		this.updateVersionList(this.editableReport);
-		this.projectNameField.setValue(this.editableReport.getSummary());
-		this.bindValuesToForm(this.editableReport);
-		toggleVisibility(editableReport);
-	}
-	
-	private void updateVersionList(final Report selectedReport) {
-		this.versionSelect.clear();
-		this.versionSelect.addItems(FacadeUtil.getVersions(selectedReport.getProject()));
 	}
 	
 	private void bindValuesToForm(final Report selectedReport) {
