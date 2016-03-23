@@ -51,6 +51,8 @@ public class ReportList extends Table {
 		
 		this.setSelectable(true);
 		this.setImmediate(true);
+		
+		this.addValueChangeListener(event -> eventRouter.fireEvent(new ReportSelectedEvent(this, (Report)event.getProperty().getValue())));
 	}
 	
 	private BeanItemContainer<Report> getReportsContainer(ProjectVersion version) {
@@ -119,8 +121,6 @@ public class ReportList extends Table {
 		this.addItemClickListener(event -> {
 			if(event.isDoubleClick()) {
 				eventRouter.fireEvent(new ReportSelectedEvent(this, (Report)event.getItemId()));
-			} else {
-				select(event.getItem());
 			}
 		});
 	}
