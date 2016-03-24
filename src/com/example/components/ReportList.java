@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.example.events.FilterChangedEvent;
 import com.example.events.ProjectVersionSelectedEvent;
+import com.example.events.report.ReportListUpdatedEvent;
 import com.example.events.report.ReportSelectedEvent;
 import com.example.events.report.ReportUpdatedEvent;
 import com.vaadin.data.Container;
@@ -113,10 +114,20 @@ public class ReportList extends Table {
 		}
 	}
 	
+	public void updateRows(final ReportListUpdatedEvent event) {
+		for(Report report: event.getUpdatedReports()) {
+			if(!report.getVersion().equals(this.selectedVersion)) {
+				this.reportContainer.removeItem(report);
+			}
+		}
+		this.refreshRowCache();
+	}
+	
 	private void registerListeners() {
 		eventRouter.addListener(ProjectVersionSelectedEvent.class, this, "handleProjectVersionChange");
 		eventRouter.addListener(FilterChangedEvent.class, this, "registerListFilter");
 		eventRouter.addListener(ReportUpdatedEvent.class, this, "updateRow");
+		eventRouter.addListener(ReportListUpdatedEvent.class, this, "updateRows");
 		this.addItemCLickListeners();
 		this.addKeyboardEventListeners();
 	}
