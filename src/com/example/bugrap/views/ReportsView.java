@@ -69,7 +69,7 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		if(event.getSelectedReports().size() <= 1) {
 			this.replaceComponent(this.getSecondComponent(), new EditReportComponent(eventRouter, event.getSelectedReports().iterator().next(), false));
 		} else {
-			this.replaceComponent(this.getSecondComponent(), new MassEditReportsComponent(event.getSelectedReports()));
+			this.replaceComponent(this.getSecondComponent(), new MassEditReportsComponent(event.getSelectedReports(), this.eventRouter));
 		}
 		
 	}
