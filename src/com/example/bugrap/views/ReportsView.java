@@ -61,11 +61,14 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	
 	private void setViewProperties() {
 		this.setSizeFull();
-		this.setSplitPosition(70, Unit.PERCENTAGE);
+		this.setSplitPosition(100, Unit.PERCENTAGE);
+		this.setLocked(true);
 		this.addStyleName("main-layout");
 	}
 	
 	public void setSelectedReport(ReportSelectedEvent event) {
+		this.setSplitPosition(60, Unit.PERCENTAGE);
+		this.setLocked(false);
 		if(event.getSelectedReports().size() <= 1) {
 			this.replaceComponent(this.getSecondComponent(), new EditReportComponent(eventRouter, event.getSelectedReports().iterator().next(), false));
 		} else {
