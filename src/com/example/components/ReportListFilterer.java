@@ -2,29 +2,38 @@ package com.example.components;
 
 import java.util.Map;
 
-import com.example.events.FilterChangedEvent;
 import com.vaadin.event.EventRouter;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.OptionGroup;
 
 @SuppressWarnings("serial")
-public class ReportListFilterer extends CustomComponent {
+public class ReportListFilterer extends AbstractListFilterer {
+	
+	private final Map<String, Object> options;
+	private OptionGroup filterOptions;
 	
 	public ReportListFilterer(final String caption, final String filterPropertyName, final Map<String, Object> options, final EventRouter eventRouter) {
-		FormLayout filtererContainer = new FormLayout();
-		OptionGroup filterOptions = new OptionGroup(caption);
+		super(caption, filterPropertyName, eventRouter);
+		this.options = options;
+		
+		this.addContent(this.getFiltererContent());
+		
+		this.registerFilterChangeListener();
+	}
+
+	public Component getFiltererContent() {
+		this.filterOptions = new OptionGroup(getCaption());
 		filterOptions.addItems(options.keySet());
-		filterOptions.addValueChangeListener(event -> {
-			eventRouter.fireEvent(new FilterChangedEvent(this, filterPropertyName, options.get(event.getProperty().getValue())));
-		});
-		filtererContainer.addComponent(filterOptions);
 		
-		filtererContainer.setSizeUndefined();
-		filterOptions.setSizeUndefined();
-		filterOptions.addStyleName("horizontal");
+		this.filterOptions.setSizeUndefined();
+		this.filterOptions.addStyleName("horizontal");
+		return this.filterOptions;
+	}
+
+	@Override
+	public void registerFilterChangeListener() {
+		this.filterOptions.addValueChangeListener(event -> fireFilterChangeEvent(options.get(event.getProperty().getValue())));
 		
-		setCompositionRoot(filtererContainer);
 	}
 
 }
