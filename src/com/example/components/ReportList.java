@@ -16,6 +16,7 @@ import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.converter.Converter;
+import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.EventRouter;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
@@ -101,8 +102,11 @@ public class ReportList extends Table {
 	
 	public void registerListFilter(FilterChangedEvent filterChangedEvent) {
 		this.reportContainer.removeAllContainerFilters();
-		Filter assigneeFilter = new AssigneeFilter(filterChangedEvent.getFilterName(), filterChangedEvent.getFilterValue()); 
-		this.reportContainer.addContainerFilter(assigneeFilter);
+		if(filterChangedEvent.getFilterName().equals("assigned")) {
+			this.reportContainer.addContainerFilter(new AssigneeFilter(filterChangedEvent.getFilterName(), filterChangedEvent.getFilterValue()));
+		} else {
+			this.reportContainer.addContainerFilter(new SimpleStringFilter(filterChangedEvent.getFilterName(), filterChangedEvent.getFilterValue().toString(), true, true));
+		}
 	}
 	
 	public void updateRow(final ReportUpdatedEvent event) {

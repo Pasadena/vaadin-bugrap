@@ -3,14 +3,13 @@ package com.example.bugrap.views;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.vaadin.alump.distributionbar.DistributionBar;
-
 import com.example.bugrap.constants.AssigneeSelections;
 import com.example.components.LoggedInUserInfo;
 import com.example.components.ProjectSelectComponent;
 import com.example.components.ProjectVersionSelectComponent;
 import com.example.components.ReportList;
 import com.example.components.ReportListFilterer;
+import com.example.components.SummarySearch;
 import com.example.components.report.EditReportComponent;
 import com.example.components.report.MassEditReportsComponent;
 import com.example.events.report.ReportSelectedEvent;
@@ -156,22 +155,6 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		FormLayout versionLayout = new FormLayout();
 		versionBar.addComponent(versionLayout);
 		versionLayout.addComponent(getVersionSelectComponent());
-		DistributionBar distributionBar = new DistributionBar(3);
-		distributionBar.setupPart(0, 0, "Closed");
-		distributionBar.getState().getParts().get(0).setStyleName("bar-part-first");
-		distributionBar.getState().getParts().get(0).setTooltip("Closed");
-		distributionBar.setupPart(1, 0, "Assigned");
-		distributionBar.getState().getParts().get(1).setStyleName("bar-part-second");
-		distributionBar.getState().getParts().get(1).setTooltip("Assigned");
-		distributionBar.setupPart(2, 0, "Unassigned");
-		distributionBar.getState().getParts().get(2).setStyleName("bar-part-third");
-		distributionBar.getState().getParts().get(2).setTooltip("Unassigned");
-		distributionBar.setMinPartWidth(30.0);
-		distributionBar.setPartSize(0, 30.0);
-		distributionBar.setPartSize(1, 30.0);
-		distributionBar.setPartSize(2, 30.0);
-		//distributionBar.setSizeFull();
-		//versionBar.addComponent(distributionBar);
 		return versionBar;
 	}
 	
@@ -188,6 +171,9 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		filterOptions.put(AssigneeSelections.FOR_ME.getSelectionValue(), loggedInUser.getName());
 		filterOptions.put(AssigneeSelections.EVERYONE.getSelectionValue(), null);
 		filterOptionsLayput.addComponent(new ReportListFilterer("Assignee", "assigned", filterOptions, eventRouter));
+
+		filterOptionsLayput.addComponent(new SummarySearch("", "summary", eventRouter));
+
 		return filterOptionsLayput;
 	}
 }

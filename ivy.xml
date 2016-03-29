@@ -49,8 +49,6 @@
 		<dependency org="org.eclipse.persistence" name="javax.persistence" rev="2.1.1" />
 		
 		<dependency org="org.eclipse.persistence" name="eclipselink" rev="2.5.0" />
-		
-		<dependency org="org.vaadin.alump.distributionbar" name="dbar-addon" rev="2.0.0" />
 
 	</dependencies>
 </ivy-module>
