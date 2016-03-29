@@ -19,10 +19,13 @@ import com.vaadin.incubator.bugrap.model.users.Reporter;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
@@ -49,10 +52,25 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		
 		VerticalLayout reportsView = new VerticalLayout();
 		
-		reportsView.addComponent(getViewHeader());
-		reportsView.addComponent(this.getVersionSelectBar());
-		reportsView.addComponent(getFilterOptionsLayout());
-		reportsView.addComponent(getReportsSection());
+		GridLayout headerLayout = this.getViewHeaderLayout();
+		
+		VerticalLayout viewBodyLayout = new VerticalLayout();
+		viewBodyLayout.addStyleName("body-layout");
+		
+		HorizontalLayout versionSelectLayout = this.getVersionSelectBar();
+		HorizontalLayout tableFiltersLayout = this.getFilterOptionsLayout();
+		VerticalLayout reportListLayout = this.getReportsSection();
+		
+		reportsView.addComponent(headerLayout);
+		reportsView.addComponent(viewBodyLayout);
+		
+		
+		viewBodyLayout.addComponent(versionSelectLayout);
+		viewBodyLayout.addComponent(tableFiltersLayout);
+		viewBodyLayout.addComponent(reportListLayout);
+		
+		reportsView.setExpandRatio(headerLayout, 0.5f);
+		viewBodyLayout.setExpandRatio(versionSelectLayout, 1f);;
 		
 		this.setFirstComponent(reportsView);
 		
@@ -76,26 +94,53 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		}
 		
 	}
+	
+	private GridLayout getViewHeaderLayout() {
+		final GridLayout headerLayout = new GridLayout(2, 2);
+		headerLayout.setWidth(99, Unit.PERCENTAGE);
+		headerLayout.addStyleName("header-layout");
+		
+		LoggedInUserInfo userInfo = new LoggedInUserInfo(loggedInUser, navigator);
+		userInfo.setSizeUndefined();
 
-	private HorizontalLayout getViewHeader() {
-		HorizontalLayout headerLayout = new HorizontalLayout();
-		FormLayout selectProjectLayout = new FormLayout();
-		LoggedInUserInfo loggedInUserComponent = new LoggedInUserInfo(loggedInUser, navigator);
-		projectSelect = new ProjectSelectComponent("Select project: ", eventRouter);
+		HorizontalLayout linksLayout = this.createHeaderLinksLayout();
 		
-		headerLayout.setWidth(100, Unit.PERCENTAGE);
+		headerLayout.addComponent(this.createProjectSelectLayout(), 0, 0);
+		headerLayout.addComponent(userInfo, 1, 0);
+		headerLayout.addComponent(linksLayout, 0, 1);
 		
-		selectProjectLayout.addComponent(projectSelect);
+		headerLayout.setComponentAlignment(userInfo, Alignment.MIDDLE_RIGHT);
+		headerLayout.setRowExpandRatio(0, 0.7f);
+		headerLayout.setRowExpandRatio(1, 0.3f);
 		
-		headerLayout.addComponent(selectProjectLayout);
-		headerLayout.addComponent(loggedInUserComponent);
-		
-		headerLayout.setExpandRatio(selectProjectLayout, 3.0f);
-		headerLayout.setExpandRatio(loggedInUserComponent, 1.0f);
-		
-		headerLayout.setComponentAlignment(selectProjectLayout, Alignment.MIDDLE_LEFT);
-		headerLayout.setComponentAlignment(loggedInUserComponent, Alignment.MIDDLE_RIGHT);
 		return headerLayout;
+	}
+	
+	private HorizontalLayout createHeaderLinksLayout() {
+		HorizontalLayout linksLayout = new HorizontalLayout();
+		linksLayout.setWidth(70, Unit.PERCENTAGE);
+		
+		Link reportBugLink = this.createHeaderLink("Report a bug", FontAwesome.BUG);
+		Link requestFeatureLink = this.createHeaderLink("Report a feature", FontAwesome.LIGHTBULB_O);
+		Link manageProjectLink = this.createHeaderLink("Manage project", FontAwesome.COG);
+		
+		linksLayout.addComponents(reportBugLink, requestFeatureLink, manageProjectLink);
+		return linksLayout;
+	}
+	
+	private Link createHeaderLink(final String caption, final FontAwesome icon) {
+		Link headerLink = new Link();
+		headerLink.setCaption(caption);
+		headerLink.setIcon(icon);
+		return headerLink;
+	}
+	
+	private FormLayout createProjectSelectLayout() {
+		FormLayout selectProjectLayout = new FormLayout();
+		projectSelect = new ProjectSelectComponent("Select project: ", eventRouter);
+		selectProjectLayout.addComponent(projectSelect);
+		selectProjectLayout.addStyleName("no-padding");
+		return selectProjectLayout;
 	}
 	
 	private VerticalLayout getReportsSection() {
@@ -132,7 +177,7 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	
 	private NativeSelect getVersionSelectComponent() {
 		if(versionSelect == null) {
-			versionSelect = new ProjectVersionSelectComponent("Reports for", eventRouter);
+			versionSelect = new ProjectVersionSelectComponent("Reports for:", eventRouter);
 		}
 		return versionSelect;
 	}

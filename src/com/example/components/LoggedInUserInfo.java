@@ -29,6 +29,7 @@ public class LoggedInUserInfo extends CustomComponent {
 
 		componentLayout.addComponent(currentUserImage);
 		componentLayout.addComponent(logoutButton);
+		componentLayout.setSizeUndefined();
 		
 		currentUserImage.setSizeUndefined();
 		logoutButton.setSizeUndefined();
