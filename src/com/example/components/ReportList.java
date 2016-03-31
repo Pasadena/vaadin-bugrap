@@ -111,11 +111,12 @@ public class ReportList extends Table {
 	
 	public void updateRow(final ReportUpdatedEvent event) {
 		Report updatedReport = event.getUpdatedReport();
-		if(updatedReport.getVersion().equals(this.selectedVersion)) {
+		if(this.selectedVersion == null || updatedReport.getVersion().equals(this.selectedVersion)) {
 			this.refreshRowCache();			
 		} else {
 			this.reportContainer.removeItem(updatedReport);
 		}
+		this.setValue(null);
 	}
 	
 	public void updateRows(final ReportListUpdatedEvent event) {
@@ -125,6 +126,7 @@ public class ReportList extends Table {
 			}
 		}
 		this.refreshRowCache();
+		this.setValue(null);
 	}
 	
 	private void registerListeners() {

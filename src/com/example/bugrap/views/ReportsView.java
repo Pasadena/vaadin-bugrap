@@ -13,6 +13,7 @@ import com.example.components.ReportListFilterer;
 import com.example.components.SummarySearch;
 import com.example.components.report.EditReportComponent;
 import com.example.components.report.MassEditReportsComponent;
+import com.example.events.layout.CloseSelectedReportEvent;
 import com.example.events.report.ReportListUpdatedEvent;
 import com.example.events.report.ReportSelectedEvent;
 import com.example.events.report.ReportUpdatedEvent;
@@ -80,8 +81,7 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		this.setFirstComponent(reportsView);
 		
 		eventRouter.addListener(ReportSelectedEvent.class, this, "setSelectedReport");
-		eventRouter.addListener(ReportUpdatedEvent.class, this, "handleReportUpdate");
-		eventRouter.addListener(ReportListUpdatedEvent.class, this, "handleReportListUpdate");
+		eventRouter.addListener(CloseSelectedReportEvent.class, this, "removeSelectedReportComponent");
 	}
 	
 	private void setViewProperties() {
@@ -97,7 +97,7 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	
 	public void setSelectedReport(final ReportSelectedEvent event) {
 		if(event.getSelectedReports().isEmpty()) {
-			this.removeSelectedReportComponent();
+			this.removeSelectedReportComponent(null);
 		} else {
 			this.addEditReportComponentToView(event);
 		}
@@ -112,17 +112,11 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		}
 	}
 	
-	public void handleReportUpdate(ReportUpdatedEvent event) {
-		this.removeSelectedReportComponent();
-	}
-	
-	public void handleReportListUpdate(ReportListUpdatedEvent event) {
-		this.removeSelectedReportComponent();
-	}
-	
-	private void removeSelectedReportComponent() {
-		this.removeComponent(this.getSecondComponent());
-		this.updateSplitPosition(100, true);
+	public void removeSelectedReportComponent(final CloseSelectedReportEvent event) {
+		if(this.getSecondComponent() != null) {
+			this.removeComponent(this.getSecondComponent());
+			this.updateSplitPosition(100, true);
+		}
 	}
 	
 	private GridLayout getViewHeaderLayout() {

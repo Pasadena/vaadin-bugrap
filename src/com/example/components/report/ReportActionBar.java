@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.example.events.layout.CloseSelectedReportEvent;
 import com.example.events.report.ReportListUpdatedEvent;
 import com.example.events.report.ReportUpdatedEvent;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -65,12 +66,14 @@ public class ReportActionBar extends HorizontalLayout {
 	protected NativeSelect statusSelect;
 	protected NativeSelect assigneeSelect;
 	
+	private final EventRouter eventRouter;
+	
 	protected void saveChanges() {}
 	protected void discardChanges() {}
 	protected List<ProjectVersion> getVersions() { return new ArrayList<ProjectVersion>(); }
 	
-	public ReportActionBar() {
-
+	public ReportActionBar(final EventRouter eventRouter) {
+		this.eventRouter = eventRouter;
 	}
 	
 	private void setContent() {
@@ -98,8 +101,8 @@ public class ReportActionBar extends HorizontalLayout {
 	}
 		
 	private void createActionBarButtons() {
-		Button updateButton = new Button("Update", event -> this.saveChanges());
-		Button revertButton = new Button("Revert", event -> this.discardChanges());
+		Button updateButton = new Button("Update", event -> this.saveAndClose());
+		Button revertButton = new Button("Revert", event -> this.discardAndClose());
 		
 		revertButton.addStyleName("danger bottom-aligned");
 		updateButton.addStyleName("primary bottom-aligned");
@@ -107,16 +110,28 @@ public class ReportActionBar extends HorizontalLayout {
 		this.addComponents(updateButton, revertButton);
 	}
 	
+	public EventRouter getEventRouter() {
+		return this.eventRouter;
+	}
+	
+	public void saveAndClose() {
+		this.saveChanges();
+		this.eventRouter.fireEvent(new CloseSelectedReportEvent(this));
+	}
+	
+	public void discardAndClose() {
+		this.discardChanges();
+		this.eventRouter.fireEvent(new CloseSelectedReportEvent(this));
+	}
+	
 	private static class SingleReportActionBar extends ReportActionBar {
 		
 		private Report editableReport;
 		private final BeanFieldGroup<Report> fieldGroup;
-		private final EventRouter eventRouter;
 		
 		public SingleReportActionBar(Report report, final EventRouter eventRouter) {
-			super();
+			super(eventRouter);
 			this.editableReport = report;
-			this.eventRouter = eventRouter;
 			this.fieldGroup = new BeanFieldGroup<>(Report.class);
 			this.fieldGroup.setItemDataSource(this.editableReport);
 			
@@ -133,7 +148,7 @@ public class ReportActionBar extends HorizontalLayout {
 			try {
 				fieldGroup.commit();
 				this.editableReport = FacadeFactory.getFacade().store(this.editableReport);
-				eventRouter.fireEvent(new ReportUpdatedEvent(this, this.editableReport));
+				getEventRouter().fireEvent(new ReportUpdatedEvent(this, this.editableReport));
 				/**if(this.externalMode) {
 					eventRouter.fireEvent(new ReloadReportEvent(this, this.editableReport));
 				}**/
@@ -163,16 +178,14 @@ public class ReportActionBar extends HorizontalLayout {
 	private static class MultiReportActionBar extends ReportActionBar {
 		
 		private final Collection<Report> editableReports;
-		private final EventRouter eventRouter;
 		
 		private final BeanFieldGroup<ReportListValueHolder> fieldGroup;
 		private ReportListValueHolder valueHolder;
 		
 		
 		public MultiReportActionBar(final Collection<Report> editableReports, final EventRouter eventRouter) {
-			super();
+			super(eventRouter);
 			this.editableReports = editableReports;
-			this.eventRouter = eventRouter;
 			this.valueHolder = new ReportListValueHolder(editableReports);
 			this.fieldGroup = new BeanFieldGroup<>(ReportListValueHolder.class);
 			this.fieldGroup.setItemDataSource(this.valueHolder);
@@ -194,7 +207,7 @@ public class ReportActionBar extends HorizontalLayout {
 					savedReports.add(FacadeUtil.store(this.populateReportData(report)));
 				}
 
-				eventRouter.fireEvent(new ReportListUpdatedEvent(this, savedReports));
+				getEventRouter().fireEvent(new ReportListUpdatedEvent(this, savedReports));
 				Notification.show("Reports updated", Notification.Type.TRAY_NOTIFICATION);
 			} catch (CommitException ce) {
 				Notification.show("Something went terribly wrong! Unable to proceed with the update!", Notification.Type.ERROR_MESSAGE);
