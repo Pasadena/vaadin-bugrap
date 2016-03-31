@@ -13,7 +13,9 @@ import com.example.components.ReportListFilterer;
 import com.example.components.SummarySearch;
 import com.example.components.report.EditReportComponent;
 import com.example.components.report.MassEditReportsComponent;
+import com.example.events.report.ReportListUpdatedEvent;
 import com.example.events.report.ReportSelectedEvent;
+import com.example.events.report.ReportUpdatedEvent;
 import com.vaadin.event.EventRouter;
 import com.vaadin.incubator.bugrap.model.projects.Project;
 import com.vaadin.incubator.bugrap.model.projects.ProjectVersion;
@@ -53,6 +55,7 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		this.setViewProperties();
 		
 		VerticalLayout reportsView = new VerticalLayout();
+		reportsView.setSizeFull();
 		
 		GridLayout headerLayout = this.getViewHeaderLayout();
 		
@@ -71,30 +74,55 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		viewBodyLayout.addComponent(tableFiltersLayout);
 		viewBodyLayout.addComponent(reportListLayout);
 		
-		reportsView.setExpandRatio(headerLayout, 0.5f);
-		viewBodyLayout.setExpandRatio(versionSelectLayout, 1f);;
+		reportsView.setExpandRatio(headerLayout, 1);
+		reportsView.setExpandRatio(viewBodyLayout, 3);;
 		
 		this.setFirstComponent(reportsView);
 		
 		eventRouter.addListener(ReportSelectedEvent.class, this, "setSelectedReport");
+		eventRouter.addListener(ReportUpdatedEvent.class, this, "handleReportUpdate");
+		eventRouter.addListener(ReportListUpdatedEvent.class, this, "handleReportListUpdate");
 	}
 	
 	private void setViewProperties() {
 		this.setSizeFull();
-		this.setSplitPosition(100, Unit.PERCENTAGE);
-		this.setLocked(true);
+		this.updateSplitPosition(100, true);
 		this.addStyleName("main-layout");
 	}
 	
-	public void setSelectedReport(ReportSelectedEvent event) {
-		this.setSplitPosition(60, Unit.PERCENTAGE);
-		this.setLocked(false);
+	private void updateSplitPosition(float percents, boolean locked) {
+		this.setSplitPosition(percents, Unit.PERCENTAGE);
+		this.setLocked(locked);
+	}
+	
+	public void setSelectedReport(final ReportSelectedEvent event) {
+		if(event.getSelectedReports().isEmpty()) {
+			this.removeSelectedReportComponent();
+		} else {
+			this.addEditReportComponentToView(event);
+		}
+	}
+		
+	private void addEditReportComponentToView(final ReportSelectedEvent event) {
+		this.updateSplitPosition(60, false);
 		if(event.getSelectedReports().size() <= 1) {
 			this.replaceComponent(this.getSecondComponent(), new EditReportComponent(eventRouter, event.getSelectedReports().iterator().next(), false));
 		} else {
 			this.replaceComponent(this.getSecondComponent(), new MassEditReportsComponent(event.getSelectedReports(), this.eventRouter));
 		}
-		
+	}
+	
+	public void handleReportUpdate(ReportUpdatedEvent event) {
+		this.removeSelectedReportComponent();
+	}
+	
+	public void handleReportListUpdate(ReportListUpdatedEvent event) {
+		this.removeSelectedReportComponent();
+	}
+	
+	private void removeSelectedReportComponent() {
+		this.removeComponent(this.getSecondComponent());
+		this.updateSplitPosition(100, true);
 	}
 	
 	private GridLayout getViewHeaderLayout() {
