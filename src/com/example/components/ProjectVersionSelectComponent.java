@@ -15,14 +15,27 @@ import com.vaadin.ui.NativeSelect;
 @SuppressWarnings("serial")
 public class ProjectVersionSelectComponent extends NativeSelect {
 	
-	public ProjectVersionSelectComponent(final String title, final EventRouter eventRouter) {
+	public ProjectVersionSelectComponent(final String title, final EventRouter eventRouter, final Project selectedProject) {
 		super(title);
-		this.setImmediate(true);
-		this.setContainerDataSource(getProjectVersionsContainer(null));
+		
+		this.setComponentProperties();
+		this.setContainerDataSource(getProjectVersionsContainer(selectedProject));
+		
 		eventRouter.addListener(ProjectSelectedEvent.class, this, "handleProjectChange");
 		this.addValueChangeListener(event -> {
 			eventRouter.fireEvent(new ProjectVersionSelectedEvent(this, (ProjectVersion)event.getProperty().getValue()));
 		});
+		
+		this.selectFirstValue();
+	}
+	
+	private void setComponentProperties() {
+		this.setImmediate(true);
+		this.setNullSelectionAllowed(false);
+	}
+	
+	private void selectFirstValue() {
+		this.select(this.getItemIds().iterator().next());
 	}
 	
 	private Container getProjectVersionsContainer(final Project selectedProject) {
@@ -39,6 +52,7 @@ public class ProjectVersionSelectComponent extends NativeSelect {
 	
 	public void handleProjectChange(ProjectSelectedEvent pse) {
 		this.setContainerDataSource(this.getProjectVersionsContainer(pse.getSelectedProject()));
+		this.selectFirstValue();
 	}
 	
 	private static ProjectVersion getAllVersionsModel(Project selectedProject) {

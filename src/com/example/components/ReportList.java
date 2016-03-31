@@ -36,11 +36,11 @@ public class ReportList extends Table {
 	
 	private ProjectVersion selectedVersion;
 	
-	public ReportList(String title, EventRouter eventRouter) {
+	public ReportList(String title, EventRouter eventRouter, final ProjectVersion activeVersion) {
 		super(title);
 		this.eventRouter = eventRouter;
 		this.setTableProperties();
-		this.setContainerDataSource(getReportsContainer(null));
+		this.setContainerDataSource(getReportsContainer(activeVersion));
 		this.setConverter("assigned", new ReporterConverter());
 		
 		this.registerListeners();

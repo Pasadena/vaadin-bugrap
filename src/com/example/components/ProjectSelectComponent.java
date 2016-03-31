@@ -18,6 +18,12 @@ public class ProjectSelectComponent extends NativeSelect {
 		this.addValueChangeListener(event -> {
 			eventRouter.fireEvent(new ProjectSelectedEvent(this, (Project)event.getProperty().getValue()));
 		});
+		this.selectFirstValue();
+	}
+	
+	private void selectFirstValue() {
+		this.setNullSelectionAllowed(false);
+		this.select(this.getItemIds().iterator().next());
 	}
 	
 	

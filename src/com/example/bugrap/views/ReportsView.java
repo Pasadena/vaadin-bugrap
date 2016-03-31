@@ -15,6 +15,8 @@ import com.example.components.report.EditReportComponent;
 import com.example.components.report.MassEditReportsComponent;
 import com.example.events.report.ReportSelectedEvent;
 import com.vaadin.event.EventRouter;
+import com.vaadin.incubator.bugrap.model.projects.Project;
+import com.vaadin.incubator.bugrap.model.projects.ProjectVersion;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
@@ -145,13 +147,12 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	
 	private VerticalLayout getReportsSection() {
 		VerticalLayout reportSection = new VerticalLayout();
-		ReportList reportList = new ReportList("", eventRouter);
+		ReportList reportList = new ReportList("", eventRouter, (ProjectVersion)versionSelect.getValue());
 		reportSection.addComponent(reportList);
 		return reportSection;
 	}
 	
 	private HorizontalLayout getVersionSelectBar() {
-		//TODO set spacing and grow  widget with expand ratio
 		HorizontalLayout versionBar = new HorizontalLayout();
 		versionBar.setWidth(100, Unit.PERCENTAGE);
 		versionBar.setSpacing(true);
@@ -159,7 +160,7 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		FormLayout versionLayout = new FormLayout();
 		versionLayout.addComponent(getVersionSelectComponent());
 		
-		VersionDistributionBar distributionBar = new VersionDistributionBar(this.eventRouter);
+		VersionDistributionBar distributionBar = new VersionDistributionBar(this.eventRouter, (ProjectVersion)versionSelect.getValue());
 		versionBar.addComponent(versionLayout);
 		versionBar.addComponent(distributionBar);
 		
@@ -170,7 +171,7 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	
 	private NativeSelect getVersionSelectComponent() {
 		if(versionSelect == null) {
-			versionSelect = new ProjectVersionSelectComponent("Reports for:", eventRouter);
+			versionSelect = new ProjectVersionSelectComponent("Reports for:", eventRouter, (Project)this.projectSelect.getValue());
 		}
 		return versionSelect;
 	}
