@@ -22,7 +22,5 @@
      information and instructions.
     -->
     <!-- <set-configuration-property name="devModeRedirectEnabled" value="true" /> -->
-
-
-    <inherits name="org.vaadin.alump.distributionbar.gwt.DistributionBarWidgetset" />
+    <stylesheet src="versiondistributionbar.css"/>
 </module>

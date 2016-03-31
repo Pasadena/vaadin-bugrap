@@ -1,0 +1,32 @@
+.versiondistributionbar {
+	border: 1px solid black;
+	border-radius: 3px;
+	line-height: 25px;
+	margin-top: 1%;
+	min-width: 90px;
+	width: 100%;
+	background-color: lightgrey;
+}
+
+.single-bar {
+	text-align: center;
+	display: inline-block;
+	min-width: 30px;
+}
+
+.closed-bar {
+	@extend .single-bar;
+	color: white;
+	background-color: grey;
+}
+ 
+.open-bar {
+	@extend .single-bar;
+	color: white;
+ 	background-color: darkgrey;
+}
+ 
+.unassigned-bar {
+	@extend .single-bar;
+	background-color: lightgrey;
+}
