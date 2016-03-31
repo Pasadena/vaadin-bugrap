@@ -42,7 +42,7 @@ $v-font-family: "Open Sans", sans-serif;
   	min-width: 200px;
   }
   
-  input[type="text"] {
+  .input-large {
   	min-width: 300px;
   }
   
@@ -96,21 +96,6 @@ $v-font-family: "Open Sans", sans-serif;
   	@extend .bottom-aligned;
   }
   
-  .bar-part-first {
-  	background-color: darkgrey;
-  	display: inline-block;
-  }
-  
-  .bar-part-second {
-  	background-color: grey;
-  	display: inline-block;
-  }
-  
-  .bar-part-third {
-  	background-color: lightgrey;
-  	display: inline-block;
-  }
-
   .button-aligned-label {
   	position: relative;
 	text-align: center;

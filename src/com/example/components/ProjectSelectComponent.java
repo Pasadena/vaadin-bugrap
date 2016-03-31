@@ -11,6 +11,7 @@ import com.vaadin.ui.NativeSelect;
 @SuppressWarnings("serial")
 public class ProjectSelectComponent extends NativeSelect {
 	
+	// TODO Pre-select first
 	public ProjectSelectComponent(final String title, final EventRouter eventRouter) {
 		super(title);
 		this.setContainerDataSource(getProjectContainer());

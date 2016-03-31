@@ -3,6 +3,7 @@ package com.example.bugrap.views;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.example.bugrap.VersionDistributionBar;
 import com.example.bugrap.constants.AssigneeSelections;
 import com.example.components.LoggedInUserInfo;
 import com.example.components.ProjectSelectComponent;
@@ -150,11 +151,20 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	}
 	
 	private HorizontalLayout getVersionSelectBar() {
+		//TODO set spacing and grow  widget with expand ratio
 		HorizontalLayout versionBar = new HorizontalLayout();
 		versionBar.setWidth(100, Unit.PERCENTAGE);
+		versionBar.setSpacing(true);
+		
 		FormLayout versionLayout = new FormLayout();
-		versionBar.addComponent(versionLayout);
 		versionLayout.addComponent(getVersionSelectComponent());
+		
+		VersionDistributionBar distributionBar = new VersionDistributionBar(this.eventRouter);
+		versionBar.addComponent(versionLayout);
+		versionBar.addComponent(distributionBar);
+		
+		versionBar.setExpandRatio(versionLayout, 1);
+		versionBar.setExpandRatio(distributionBar, 2);
 		return versionBar;
 	}
 	

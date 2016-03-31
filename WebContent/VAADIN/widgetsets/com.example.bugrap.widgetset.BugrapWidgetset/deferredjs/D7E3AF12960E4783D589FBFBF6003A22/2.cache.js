@@ -1,1 +1,0 @@
-$wnd.com_example_bugrap_widgetset_BugrapWidgetset.runAsyncCallback2('Gdb(1612,1,k1d);_.vc=function zhc(){t2b((!m2b&&(m2b=new y2b),m2b),this.a.d)};KWd(Th)(2);\n//# sourceURL=com.example.bugrap.widgetset.BugrapWidgetset-2.js\n')

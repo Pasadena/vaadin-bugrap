@@ -21,6 +21,7 @@ public class SummarySearch extends AbstractListFilterer {
 		this.searchField = new TextField(this.getCaption());
 		this.searchField.setSizeUndefined();
 		this.searchField.setInputPrompt("Search reports...");
+		this.searchField.addStyleName("input-large");
 		
 		//No icon for this field, see https://dev.vaadin.com/ticket/18668
 		//this.searchField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);

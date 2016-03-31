@@ -3,3 +3,4 @@
 .settings/
 build/
 /bin/
+/WebContent/VAADIN/widgetsets/*
