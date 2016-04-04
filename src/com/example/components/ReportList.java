@@ -51,8 +51,7 @@ public class ReportList extends Table {
 	}
 	
 	private void setTableProperties() {
-		//TODO: Set selection mode to multi
-		this.setWidth(90, Unit.PERCENTAGE);
+		this.setWidth(100, Unit.PERCENTAGE);
 		this.setHeightUndefined();
 		
 		this.setSelectable(true);
@@ -91,8 +90,8 @@ public class ReportList extends Table {
 			this.setVisible(false);
 		} else {
 			this.setVisible(true);
-			this.setVisibleColumns("priority", "type", "summary", "assigned", "timestamp");
-			this.setColumnHeaders("Priority", "Type", "Summary", "Assigned to", "Reported");
+			this.setVisibleColumns("priority", "type", "summary", "assigned", "status", "resolution", "timestamp");
+			this.setColumnHeaders("Priority", "Type", "Summary", "Assigned to", "Status", "Resolution", "Reported");
 			this.sort(new Object[] { "priority" }, new boolean[] { false });
 		}
 	}
