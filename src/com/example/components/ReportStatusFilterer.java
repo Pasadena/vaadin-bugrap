@@ -25,7 +25,6 @@ import com.vaadin.ui.Window;
 public class ReportStatusFilterer extends AbstractListFilterer {
 	
 	private OptionGroup filterOptions;
-//	private PopupView customSelectionView;
 	private final Map<String, ReportStatus> options;
 	
 	private static final Map<ReportResolution, String> resolutionLabelMap = new LinkedHashMap<>();
@@ -54,9 +53,8 @@ public class ReportStatusFilterer extends AbstractListFilterer {
 		super(caption, filterPropertyName, eventRouter);
 		this.options = this.getOptionList();
 		this.selectedResolutions = new HashSet<>();
-		
-		//this.customSelectionView = this.getCustomSelectionView();
-//		this.addContent(this.getFiltererContent(), customSelectionView);
+		this.selectedStatus = null;
+
 		this.addContent(this.getFiltererContent());
 		
 		this.registerFilterChangeListener();
@@ -86,7 +84,7 @@ public class ReportStatusFilterer extends AbstractListFilterer {
 	private void addPopUpView() {
 		//this.customSelectionView.setPopupVisible(true);
 		//this.customSelectionView.setVisible(true);
-		StatusPopup popup = new StatusPopup(selectedStatus, selectedResolutions, this.popupPositionX, this.popupPositionY);
+		StatusPopup popup = new StatusPopup(this.popupPositionX, this.popupPositionY);
 		UI.getCurrent().addWindow(popup);
 		UI.getCurrent().addClickListener(popup);
 	}
@@ -157,15 +155,11 @@ public class ReportStatusFilterer extends AbstractListFilterer {
 	}**/
 	
 	private class StatusPopup extends Window implements ClickListener {
-		
-		private ReportStatus selectedStatus;
-		private Set<ReportResolution> selectedResolutions;
+
 		private int xAxisPosition;
 		private int yAxisPosition;
-		public StatusPopup(ReportStatus selectedStatus, Set<ReportResolution> selectedResolutions, int xPosition, int yPosition) {
+		public StatusPopup(int xPosition, int yPosition) {
 			super();
-			this.selectedStatus = selectedStatus;
-			this.selectedResolutions = selectedResolutions;
 			this.xAxisPosition = xPosition;
 			this.yAxisPosition = yPosition;
 			
@@ -185,18 +179,20 @@ public class ReportStatusFilterer extends AbstractListFilterer {
 			
 			CheckBox openStatusBox = new CheckBox(OPEN_SELECTION_LABEL);
 			openStatusBox.addStyleName("status-checkbox");
-			openStatusBox.addValueChangeListener(event -> this.selectedStatus = openStatusBox.getValue() ? ReportStatus.OPEN : null);
+			openStatusBox.addValueChangeListener(event -> selectedStatus = openStatusBox.getValue() ? ReportStatus.OPEN : null);
+			openStatusBox.setValue(selectedStatus != null);
 			popupContent.addComponent(openStatusBox);
 			
 			for(Map.Entry<ReportResolution, String> resolutionEntry: resolutionLabelMap.entrySet()) {
 				CheckBox resolutionBox = new CheckBox(resolutionEntry.getValue());
 				resolutionBox.addValueChangeListener(event -> {
 					if(resolutionBox.getValue()) {
-						this.selectedResolutions.add(resolutionEntry.getKey());
+						selectedResolutions.add(resolutionEntry.getKey());
 					} else {
-						this.selectedResolutions.remove(resolutionEntry.getKey());
+						selectedResolutions.remove(resolutionEntry.getKey());
 					}
 				});
+				resolutionBox.setValue(selectedResolutions.contains(resolutionEntry.getKey()));
 				popupContent.addComponent(resolutionBox);
 			}
 			this.setContent(popupContent);
@@ -204,7 +200,7 @@ public class ReportStatusFilterer extends AbstractListFilterer {
 		
 		@Override
 		public void click(ClickEvent event) {
-			fireFilterChangeEvent(new StatusFiltererDTO(this.selectedStatus, selectedResolutions));
+			fireFilterChangeEvent(new StatusFiltererDTO(selectedStatus, selectedResolutions));
 			this.close();
 			UI.getCurrent().removeClickListener(this);
 		}
