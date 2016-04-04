@@ -118,4 +118,27 @@ $v-font-family: "Open Sans", sans-serif;
   		margin-left: 2%;
   	}
   }
+  
+  .v-csslayout .v-captiontext {
+  	vertical-align: top;
+    line-height: 36px;
+    min-width: 119px;
+  }
+  
+  .status-checkbox {
+  	margin-bottom: 30px;
+  }
+  
+  .popup-status {
+  	padding: 10px;
+  	line-height: 30px;
+  }
+  
+  .v-window-maximizebox {
+  	display: none;
+  }
+  
+  .v-window-closebox {
+  	display: none;
+  }
 }

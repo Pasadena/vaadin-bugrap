@@ -10,13 +10,12 @@ import com.example.components.ProjectSelectComponent;
 import com.example.components.ProjectVersionSelectComponent;
 import com.example.components.ReportList;
 import com.example.components.ReportListFilterer;
+import com.example.components.ReportStatusFilterer;
 import com.example.components.SummarySearch;
 import com.example.components.report.EditReportComponent;
 import com.example.components.report.MassEditReportsComponent;
 import com.example.events.layout.CloseSelectedReportEvent;
-import com.example.events.report.ReportListUpdatedEvent;
 import com.example.events.report.ReportSelectedEvent;
-import com.example.events.report.ReportUpdatedEvent;
 import com.vaadin.event.EventRouter;
 import com.vaadin.incubator.bugrap.model.projects.Project;
 import com.vaadin.incubator.bugrap.model.projects.ProjectVersion;
@@ -200,12 +199,22 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	
 	private HorizontalLayout getFilterOptionsLayout() {
 		HorizontalLayout filterOptionsLayput = new HorizontalLayout();
+		filterOptionsLayput.setWidth(100, Unit.PERCENTAGE);
+		filterOptionsLayput.setSpacing(true);
 		Map<String, Object> filterOptions = new HashMap<>();
 		filterOptions.put(AssigneeSelections.FOR_ME.getSelectionValue(), loggedInUser.getName());
 		filterOptions.put(AssigneeSelections.EVERYONE.getSelectionValue(), null);
-		filterOptionsLayput.addComponent(new ReportListFilterer("Assignee", "assigned", filterOptions, eventRouter));
+		
+		final ReportListFilterer assigneeFilterer = new ReportListFilterer("Assignee:", "assigned", filterOptions, eventRouter); 
+		filterOptionsLayput.addComponent(assigneeFilterer);
 
-		filterOptionsLayput.addComponent(new SummarySearch("", "summary", eventRouter));
+		final ReportStatusFilterer statusFilterer = new ReportStatusFilterer("Status:", "status", eventRouter); 
+		filterOptionsLayput.addComponent(statusFilterer);
+		
+		final SummarySearch summmarySearch = new SummarySearch("", "summary", eventRouter); 
+		filterOptionsLayput.addComponent(summmarySearch);
+		
+		filterOptionsLayput.setComponentAlignment(summmarySearch, Alignment.MIDDLE_RIGHT);
 
 		return filterOptionsLayput;
 	}
