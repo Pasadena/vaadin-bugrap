@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import com.example.components.ReportStatusFilterer.StatusFiltererDTO;
 import com.example.events.FilterChangedEvent;
 import com.example.events.ProjectVersionSelectedEvent;
 import com.example.events.report.ReportListUpdatedEvent;
@@ -25,6 +26,8 @@ import com.vaadin.incubator.bugrap.model.facade.FacadeUtil;
 import com.vaadin.incubator.bugrap.model.projects.Project;
 import com.vaadin.incubator.bugrap.model.projects.ProjectVersion;
 import com.vaadin.incubator.bugrap.model.reports.Report;
+import com.vaadin.incubator.bugrap.model.reports.ReportResolution;
+import com.vaadin.incubator.bugrap.model.reports.ReportStatus;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
 import com.vaadin.ui.Table;
 
@@ -104,6 +107,8 @@ public class ReportList extends Table {
 		this.reportContainer.removeAllContainerFilters();
 		if(filterChangedEvent.getFilterName().equals("assigned")) {
 			this.reportContainer.addContainerFilter(new AssigneeFilter(filterChangedEvent.getFilterName(), filterChangedEvent.getFilterValue()));
+		} else if(filterChangedEvent.getFilterName().equals("status")) {
+			this.reportContainer.addContainerFilter(new StatusFilter(filterChangedEvent.getFilterName(), filterChangedEvent.getFilterValue()));
 		} else {
 			this.reportContainer.addContainerFilter(new SimpleStringFilter(filterChangedEvent.getFilterName(), filterChangedEvent.getFilterValue().toString(), true, true));
 		}
@@ -209,6 +214,50 @@ public class ReportList extends Table {
 		@Override
 		public boolean appliesToProperty(Object propertyId) {
 			return propertyId != null && this.propertyId.equals(propertyId);
+		}
+		
+	}
+	
+	private class StatusFilter implements Container.Filter {
+		
+		private final Object propertyId;
+		private final StatusFiltererDTO filterValue;
+
+		public StatusFilter(Object propertyId, Object filterValue) {
+			this.propertyId = propertyId;
+			this.filterValue = this.getFiltererDTO(filterValue);
+		}
+		
+		private StatusFiltererDTO getFiltererDTO(Object statusFiltererObject) {
+			try {
+				return (StatusFiltererDTO)statusFiltererObject;
+			} catch(ClassCastException cce) {
+				throw new RuntimeException("Cannot create Status filerer object from filter event's value");
+			}
+		}
+
+		@Override
+		public boolean passesFilter(Object itemId, Item item) throws UnsupportedOperationException {
+			if(this.filterValue == null || !hasFilterValue()) {
+				return true;
+			}
+			Report itemBean = (Report)itemId;
+			ReportStatus selectedStatus = this.filterValue.getSelectedStatus();
+			Set<ReportResolution> selectedResolutions = this.filterValue.getSelectedResolutions();
+			
+			if(selectedStatus != null && selectedStatus != itemBean.getStatus()) {
+				return false;
+			}
+			return selectedResolutions != null ? selectedResolutions.contains(itemBean.getResolution()) : true;
+		}
+		
+		private boolean hasFilterValue() {
+			return this.filterValue.getSelectedStatus() != null || (this.filterValue.getSelectedResolutions() != null && !this.filterValue.getSelectedResolutions().isEmpty());
+		}
+
+		@Override
+		public boolean appliesToProperty(Object propertyId) {
+			return propertyId != null && propertyId.equals(this.propertyId);
 		}
 		
 	}
