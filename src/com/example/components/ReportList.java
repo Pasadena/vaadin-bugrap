@@ -1,5 +1,6 @@
 package com.example.components;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -16,6 +17,7 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.DefaultItemSorter;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.EventRouter;
@@ -26,9 +28,13 @@ import com.vaadin.incubator.bugrap.model.facade.FacadeUtil;
 import com.vaadin.incubator.bugrap.model.projects.Project;
 import com.vaadin.incubator.bugrap.model.projects.ProjectVersion;
 import com.vaadin.incubator.bugrap.model.reports.Report;
+import com.vaadin.incubator.bugrap.model.reports.ReportPriority;
 import com.vaadin.incubator.bugrap.model.reports.ReportResolution;
 import com.vaadin.incubator.bugrap.model.reports.ReportStatus;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 
 @SuppressWarnings("serial")
@@ -42,12 +48,15 @@ public class ReportList extends Table {
 	public ReportList(String title, EventRouter eventRouter, final ProjectVersion activeVersion) {
 		super(title);
 		this.eventRouter = eventRouter;
+		
 		this.setTableProperties();
+		
 		this.setContainerDataSource(getReportsContainer(activeVersion));
 		this.setConverter("assigned", new ReporterConverter());
-		
+
 		this.registerListeners();
 		this.toggleTableVisibility();
+		this.addGeneratedColumns();
 	}
 	
 	private void setTableProperties() {
@@ -63,6 +72,44 @@ public class ReportList extends Table {
 		});
 	}
 	
+	private void setTableColumnProperties() {
+		this.setVisibleColumns("priority", "type", "summary", "assigned", "status", "resolution", "timestamp");
+		this.setColumnHeaders("Priority", "Type", "Summary", "Assigned to", "Status", "Resolution", "Reported");
+		this.sort(new Object[] { "priority" }, new boolean[] { false });
+	}
+	
+	private void addGeneratedColumns() {
+		this.addGeneratedColumn("priority", new Table.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				return new Label(getImageMatchingPriority((Report)itemId), ContentMode.HTML);
+			}
+		});
+	}
+	
+	private String getImageMatchingPriority(final Report report) {
+		if(report.getPriority() == null) {
+			return "";
+		}
+		switch (report.getPriority()) {
+			case BLOCKER:
+				return FontAwesome.BATTERY_4.getHtml();
+			case CRITICAL:
+				return FontAwesome.BATTERY_3.getHtml();
+			case MAJOR:
+				return FontAwesome.BATTERY_2.getHtml();
+			case NORMAL:
+				return FontAwesome.BATTERY_1.getHtml();
+			case MINOR:
+				return FontAwesome.BATTERY_0.getHtml();
+			case TRIVIAL:
+				return FontAwesome.BATTERY_EMPTY.getHtml();
+			default:
+				return FontAwesome.BATTERY_EMPTY.getHtml();
+		}
+	}
+	
 	private BeanItemContainer<Report> getReportsContainer(ProjectVersion version) {
 		this.reportContainer = new BeanItemContainer<>(Report.class);
 		if(version == null) {
@@ -74,6 +121,7 @@ public class ReportList extends Table {
 			//TODO: In this case add version-column to list
 			reportContainer.addAll(getAllReportsForProject(version.getProject()));
 		}
+		reportContainer.setItemSorter(new ReportPrioritySorter());
 		return reportContainer;
 	}
 	
@@ -90,9 +138,7 @@ public class ReportList extends Table {
 			this.setVisible(false);
 		} else {
 			this.setVisible(true);
-			this.setVisibleColumns("priority", "type", "summary", "assigned", "status", "resolution", "timestamp");
-			this.setColumnHeaders("Priority", "Type", "Summary", "Assigned to", "Status", "Resolution", "Reported");
-			this.sort(new Object[] { "priority" }, new boolean[] { false });
+			this.setTableColumnProperties();
 		}
 	}
 	
@@ -164,14 +210,12 @@ public class ReportList extends Table {
 		@Override
 		public Reporter convertToModel(String value, Class<? extends Reporter> targetType, Locale locale)
 				throws com.vaadin.data.util.converter.Converter.ConversionException {
-			// TODO Auto-generated method stub
 			return null;
 		}
 	
 		@Override
 		public String convertToPresentation(Reporter value, Class<? extends String> targetType, Locale locale)
 				throws com.vaadin.data.util.converter.Converter.ConversionException {
-			// TODO Auto-generated method stub
 			if(value == null) return "";
 			return value.getName();
 		}
@@ -185,7 +229,35 @@ public class ReportList extends Table {
 		public Class<String> getPresentationType() {
 			return String.class;
 		}
+	}
+	
+	public static class ReportPrioritySorter extends DefaultItemSorter {
+
+		public ReportPrioritySorter() {
+			super(new ReportPriorityComparator());
+		}
 		
+		public static class ReportPriorityComparator implements Comparator<Object> {
+
+			@Override
+			public int compare(Object firstObject, Object secondObject) {
+				ReportPriority firstPriority = (ReportPriority)firstObject;
+				ReportPriority secondPriority = (ReportPriority)secondObject;
+				if(firstPriority == null && secondPriority != null) {
+					return -1;
+				}
+				if(secondPriority == null && firstPriority != null) {
+					return 1;
+				}
+				if(firstPriority == null && secondPriority == null) {
+					return 0;
+				}
+				int compareResult = firstPriority.compareTo(secondPriority);
+				//Hack hack, multiply with -1 in order to reverse normal enum compare (priorities are declared from worst to easiest, which is opposite that we want here).
+				//Correct fix would be to include custom attribute to enum, which tells the severity of the value). But this cannot be done, so let's suffer this.
+				return compareResult * -1;
+			}
+		}
 	}
 	
 	private class AssigneeFilter implements Container.Filter {
