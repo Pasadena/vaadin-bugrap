@@ -21,7 +21,9 @@ import com.vaadin.incubator.bugrap.model.reports.ReportPriority;
 import com.vaadin.incubator.bugrap.model.reports.ReportStatus;
 import com.vaadin.incubator.bugrap.model.reports.ReportType;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.NativeSelect;
@@ -62,7 +64,7 @@ public class ReportActionBar extends HorizontalLayout {
 		
 	protected NativeSelect versionSelect;
 	protected NativeSelect typeSelect;
-	protected NativeSelect prioritySelect;
+	protected ComboBox prioritySelect;
 	protected NativeSelect statusSelect;
 	protected NativeSelect assigneeSelect;
 	
@@ -92,11 +94,29 @@ public class ReportActionBar extends HorizontalLayout {
 	}
 	
 	private void createActionBarSelects() {
-		this.prioritySelect = new NativeSelect("Priority", Arrays.asList(ReportPriority.values()));
+		this.prioritySelect = new ComboBox("Priority");
+		this.prioritySelect.addItems(Arrays.asList(ReportPriority.values()));
+
+		this.prioritySelect.setItemIcon(ReportPriority.BLOCKER, FontAwesome.BATTERY_4);
+		this.prioritySelect.setItemIcon(ReportPriority.CRITICAL, FontAwesome.BATTERY_3);
+		this.prioritySelect.setItemIcon(ReportPriority.MAJOR, FontAwesome.BATTERY_2);
+		this.prioritySelect.setItemIcon(ReportPriority.NORMAL, FontAwesome.BATTERY_1);
+		this.prioritySelect.setItemIcon(ReportPriority.MINOR, FontAwesome.BATTERY_0);
+		this.prioritySelect.setItemIcon(ReportPriority.TRIVIAL, FontAwesome.BATTERY_EMPTY);
+		this.prioritySelect.setTextInputAllowed(false);
+		
 		this.typeSelect = new NativeSelect("Type", Arrays.asList(ReportType.values()));
-		this.statusSelect = new NativeSelect("Status", Arrays.asList(ReportStatus.values()));		
+		this.typeSelect.addStyleName("report-edit-select");
+		
+		this.statusSelect = new NativeSelect("Status", Arrays.asList(ReportStatus.values()));	
+		this.statusSelect.addStyleName("report-edit-select");
+		
 		this.assigneeSelect = new NativeSelect("Assigned to", FacadeUtil.getReporters());
+		this.assigneeSelect.addStyleName("report-edit-select");
+		
 		this.versionSelect = new NativeSelect("Version", this.getVersions());
+		this.versionSelect.addStyleName("report-edit-select");
+		
 		this.addComponents(prioritySelect, typeSelect, statusSelect, assigneeSelect, versionSelect);
 	}
 		
@@ -337,5 +357,4 @@ public class ReportActionBar extends HorizontalLayout {
 			
 		}
 	}
-
 }
