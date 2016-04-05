@@ -1,9 +1,11 @@
 package com.example.components;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,7 +20,6 @@ import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.DefaultItemSorter;
-import com.vaadin.data.util.converter.Converter;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.EventRouter;
 import com.vaadin.event.ShortcutAction.KeyCode;
@@ -31,6 +32,7 @@ import com.vaadin.incubator.bugrap.model.reports.Report;
 import com.vaadin.incubator.bugrap.model.reports.ReportPriority;
 import com.vaadin.incubator.bugrap.model.reports.ReportResolution;
 import com.vaadin.incubator.bugrap.model.reports.ReportStatus;
+import com.vaadin.incubator.bugrap.model.reports.ReportType;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -40,7 +42,16 @@ import com.vaadin.ui.Table;
 @SuppressWarnings("serial")
 public class ReportList extends Table {
 	
-	private BeanItemContainer<Report> reportContainer;
+	private final Object[] normalColumnProperties = new Object[] {"source.priority", "source.type", "source.summary", "source.assigned", "source.status", "source.resolution", "source.timestamp"};
+	private final String[] normalColumnHeaderNames = new String[] {"Priority", "Type", "Summary", "Assigned to", "Status", "Resolution", "Reported"};
+	
+	private final Object[] columnPropertiesWithVersion = new Object[] {"versionName", "source.priority", "source.type", "source.summary", "source.assigned", "source.status", "source.resolution", "source.timestamp"};
+	private final String[] columnHeaderNamesWithVersion = new String[] {"Version", "Priority", "Type", "Summary", "Assigned to", "Status", "Resolution", "Reported"};
+	
+	private final String PRIORITY_PROPERTY_NAME = "source.priority";
+	private final String VERSION_PROPERTY_NAME = "versionName";
+	
+	private BeanItemContainer<WrappedReport> reportContainer;
 	private final EventRouter eventRouter;
 	
 	private ProjectVersion selectedVersion;
@@ -52,43 +63,59 @@ public class ReportList extends Table {
 		this.setTableProperties();
 		
 		this.setContainerDataSource(getReportsContainer(activeVersion));
-		this.setConverter("assigned", new ReporterConverter());
 
 		this.registerListeners();
-		this.toggleTableVisibility();
+		this.toggleTableVisibility(activeVersion);
 		this.addGeneratedColumns();
+		this.setTableSorting(this.areMultipleVersionsSelected(activeVersion));
 	}
 	
 	private void setTableProperties() {
 		this.setWidth(100, Unit.PERCENTAGE);
-		this.setHeightUndefined();
 		
 		this.setSelectable(true);
 		this.setImmediate(true);
 		this.setMultiSelect(true);
 		this.addValueChangeListener(event -> {
-			@SuppressWarnings("unchecked")Set<Report> selectedValues = (Set<Report>)event.getProperty().getValue();
+			@SuppressWarnings("unchecked")Set<WrappedReport> selectedWrappers = (Set<WrappedReport>)event.getProperty().getValue();
+			Set<Report> selectedValues = WrappedReport.getSourcesFromWrappers(selectedWrappers);
 			eventRouter.fireEvent(new ReportSelectedEvent(this, selectedValues));
 		});
 	}
 	
-	private void setTableColumnProperties() {
-		this.setVisibleColumns("priority", "type", "summary", "assigned", "status", "resolution", "timestamp");
-		this.setColumnHeaders("Priority", "Type", "Summary", "Assigned to", "Status", "Resolution", "Reported");
-		this.sort(new Object[] { "priority" }, new boolean[] { false });
+	private void setTableColumnProperties(boolean includeVersion) {
+		if(includeVersion) {
+			this.setVisibleColumns(columnPropertiesWithVersion);
+			this.setColumnHeaders(columnHeaderNamesWithVersion);
+		} else {
+			this.setVisibleColumns(normalColumnProperties);
+			this.setColumnHeaders(normalColumnHeaderNames);
+		}
+	}
+	
+	private void setTableSorting(boolean includeVersion) {
+		if(includeVersion) {
+			this.sort(new Object[] { VERSION_PROPERTY_NAME, PRIORITY_PROPERTY_NAME}, new boolean[] { true, false });
+		} else {
+			this.sort(new Object[] { PRIORITY_PROPERTY_NAME }, new boolean[] { false });
+		}
 	}
 	
 	private void addGeneratedColumns() {
-		this.addGeneratedColumn("priority", new Table.ColumnGenerator() {
+		this.addGeneratedColumn(PRIORITY_PROPERTY_NAME, new Table.ColumnGenerator() {
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				return new Label(getImageMatchingPriority((Report)itemId), ContentMode.HTML);
+				return new Label(getImageMatchingPriority((WrappedReport)itemId), ContentMode.HTML);
 			}
 		});
 	}
 	
-	private String getImageMatchingPriority(final Report report) {
+	private boolean areMultipleVersionsSelected(final ProjectVersion projectVersion) {
+		return projectVersion.getId() <= 0;
+	}
+	
+	private String getImageMatchingPriority(final WrappedReport report) {
 		if(report.getPriority() == null) {
 			return "";
 		}
@@ -110,19 +137,29 @@ public class ReportList extends Table {
 		}
 	}
 	
-	private BeanItemContainer<Report> getReportsContainer(ProjectVersion version) {
-		this.reportContainer = new BeanItemContainer<>(Report.class);
+	private BeanItemContainer<WrappedReport> getReportsContainer(ProjectVersion version) {
+		this.reportContainer = new BeanItemContainer<>(WrappedReport.class);
+		this.setNestedContainerProperties();
 		if(version == null) {
 			return reportContainer;
 		}
 		if(version.getId() > 0) {
-			reportContainer.addAll(FacadeUtil.getReportsForVersion(version));
+			reportContainer.addAll(WrappedReport.buildListFromSource(FacadeUtil.getReportsForVersion(version)));
 		} else {
-			//TODO: In this case add version-column to list
-			reportContainer.addAll(getAllReportsForProject(version.getProject()));
+			reportContainer.addAll(WrappedReport.buildListFromSource(getAllReportsForProject(version.getProject())));
 		}
-		reportContainer.setItemSorter(new ReportPrioritySorter());
+		reportContainer.setItemSorter(new ReportPrioritySorter(this.reportContainer, new Object[] {PRIORITY_PROPERTY_NAME}, new boolean[] { false }));
 		return reportContainer;
+	}
+	
+	private void setNestedContainerProperties() {
+		this.reportContainer.addNestedContainerProperty("source.priority");
+		this.reportContainer.addNestedContainerProperty("source.type");
+		this.reportContainer.addNestedContainerProperty("source.summary");
+		this.reportContainer.addNestedContainerProperty("source.assigned");
+		this.reportContainer.addNestedContainerProperty("source.status");
+		this.reportContainer.addNestedContainerProperty("source.resolution");
+		this.reportContainer.addNestedContainerProperty("source.timestamp");
 	}
 	
 	private List<Report> getAllReportsForProject(Project project) {
@@ -133,23 +170,24 @@ public class ReportList extends Table {
                 params);
 	}
 
-	private void toggleTableVisibility() {
+	private void toggleTableVisibility(final ProjectVersion projectVersion) {
 		if(this.getContainerDataSource().getItemIds().isEmpty()) {
 			this.setVisible(false);
 		} else {
 			this.setVisible(true);
-			this.setTableColumnProperties();
+			this.setTableColumnProperties(this.areMultipleVersionsSelected(projectVersion));
 		}
 	}
 	
 	public void handleProjectVersionChange(ProjectVersionSelectedEvent event) {
 		this.setContainerDataSource(getReportsContainer(event.getProjectVersion()));
 		this.selectedVersion = event.getProjectVersion();
-		this.toggleTableVisibility();
+		this.setTableSorting(this.areMultipleVersionsSelected(this.selectedVersion));
+		this.toggleTableVisibility(event.getProjectVersion());
 	}
 	
 	public void registerListFilter(FilterChangedEvent filterChangedEvent) {
-		this.reportContainer.removeAllContainerFilters();
+		this.reportContainer.removeContainerFilters(filterChangedEvent.getFilterName());
 		if(filterChangedEvent.getFilterName().equals("assigned")) {
 			this.reportContainer.addContainerFilter(new AssigneeFilter(filterChangedEvent.getFilterName(), filterChangedEvent.getFilterValue()));
 		} else if(filterChangedEvent.getFilterName().equals("status")) {
@@ -161,12 +199,10 @@ public class ReportList extends Table {
 	
 	public void updateRow(final ReportUpdatedEvent event) {
 		Report updatedReport = event.getUpdatedReport();
-		if(this.selectedVersion == null || updatedReport.getVersion().equals(this.selectedVersion)) {
-			this.refreshRowCache();			
-		} else {
-			this.reportContainer.removeItem(updatedReport);
+		if(this.selectedVersion != null && !updatedReport.getVersion().equals(this.selectedVersion)) {
+			this.reportContainer.removeItem(updatedReport);			
 		}
-		this.setValue(null);
+		this.refreshTableAfterUpdate();
 	}
 	
 	public void updateRows(final ReportListUpdatedEvent event) {
@@ -175,8 +211,13 @@ public class ReportList extends Table {
 				this.reportContainer.removeItem(report);
 			}
 		}
+		this.refreshTableAfterUpdate();
+	}
+	
+	private void refreshTableAfterUpdate() {
 		this.refreshRowCache();
 		this.setValue(null);
+		this.sort();
 	}
 	
 	private void registerListeners() {
@@ -191,7 +232,8 @@ public class ReportList extends Table {
 	private void addItemCLickListeners() {
 		this.addItemClickListener(event -> {
 			if(event.isDoubleClick()) {
-				//eventRouter.fireEvent(new ReportSelectedEvent(this, (Report)event.getItemId()));
+				WrappedReport clickedReport = (WrappedReport)event.getItemId();
+				this.openSelectedReportInNewWindow(clickedReport.getSource());
 			}
 		});
 	}
@@ -204,58 +246,108 @@ public class ReportList extends Table {
 			}
 		});
 	}
-
-	private class ReporterConverter implements Converter<String, Reporter> {
 	
-		@Override
-		public Reporter convertToModel(String value, Class<? extends Reporter> targetType, Locale locale)
-				throws com.vaadin.data.util.converter.Converter.ConversionException {
-			return null;
-		}
+	private void openSelectedReportInNewWindow(Report clickedReport) {
+		getUI().getPage().open(getUI().getPage().getLocation().getPath() + "popup/SingleReportUI?reportId=" +clickedReport.getId(), getUI().getPage().getWindowName() +clickedReport.getId());
+	}
 	
-		@Override
-		public String convertToPresentation(Reporter value, Class<? extends String> targetType, Locale locale)
-				throws com.vaadin.data.util.converter.Converter.ConversionException {
-			if(value == null) return "";
-			return value.getName();
+	public static class WrappedReport {
+		
+		public static List<WrappedReport> buildListFromSource(final List<Report> sources) {
+			List<WrappedReport> result = new ArrayList<ReportList.WrappedReport>();
+			for(Report report: sources) {
+				result.add(new WrappedReport(report));
+			}
+			return result;
 		}
-	
-		@Override
-		public Class<Reporter> getModelType() {
-			return Reporter.class;
+		
+		public static Set<Report> getSourcesFromWrappers(final Set<WrappedReport> wrappers) {
+			Set<Report> result = new HashSet<Report>();
+			for(WrappedReport wrapper: wrappers) {
+				result.add(wrapper.getSource());
+			}
+			return result;
 		}
-	
-		@Override
-		public Class<String> getPresentationType() {
-			return String.class;
+		
+		private final Report source;
+		
+		public WrappedReport(final Report source) {
+			this.source = source;
 		}
+		
+		public Report getSource() {
+			return source;
+		}
+		
+		public String getVersionName() {
+			return source.getVersion() != null ? source.getVersion().getVersion() : null;
+		}
+		
+		public ReportType getType() {
+	        return source.getType();
+	    }
+		
+		public String getSummary() {
+	        return source.getSummary();
+	    }
+		
+		public ReportPriority getPriority() {
+	        return source.getPriority();
+	    }
+		
+		public Reporter getAssigned() {
+	        return source.getAssigned();
+	    }
+		
+		public ReportStatus getStatus() {
+	        return source.getStatus();
+	    }
+		
+		public ReportResolution getResolution() {
+	        return source.getResolution();
+	    }
+		
+		public Date getTimestamp() {
+	        return source.getTimestamp();
+	    }
 	}
 	
 	public static class ReportPrioritySorter extends DefaultItemSorter {
 
-		public ReportPrioritySorter() {
+		public ReportPrioritySorter(Container.Sortable container, Object[] properties, boolean[] ascending) {
 			super(new ReportPriorityComparator());
+			this.setSortProperties(container, properties, ascending);
 		}
 		
 		public static class ReportPriorityComparator implements Comparator<Object> {
 
 			@Override
 			public int compare(Object firstObject, Object secondObject) {
-				ReportPriority firstPriority = (ReportPriority)firstObject;
-				ReportPriority secondPriority = (ReportPriority)secondObject;
-				if(firstPriority == null && secondPriority != null) {
+				if(firstObject instanceof String || secondObject instanceof String) {
+					return compareObjects((String)firstObject, (String)secondObject, 1);
+				} else {
+					//Hack hack, multiply with -1 in order to reverse normal enum compare (priorities are declared from worst to easiest, which is opposite that we want here).
+					//Correct fix would be to include custom attribute to enum, which tells the severity of the value). But this cannot be done, so let's suffer this.
+					return compareObjects((ReportPriority)firstObject, (ReportPriority)secondObject, -1);
+				}
+				
+			}
+			
+			
+			@SuppressWarnings("rawtypes" )
+			private int compareObjects(final Comparable first, final Comparable second, int multiplier) {
+				if(first == null && second != null) {
 					return -1;
 				}
-				if(secondPriority == null && firstPriority != null) {
+				if(second == null && first != null) {
 					return 1;
 				}
-				if(firstPriority == null && secondPriority == null) {
+				if(first == null && second == null) {
 					return 0;
 				}
-				int compareResult = firstPriority.compareTo(secondPriority);
-				//Hack hack, multiply with -1 in order to reverse normal enum compare (priorities are declared from worst to easiest, which is opposite that we want here).
-				//Correct fix would be to include custom attribute to enum, which tells the severity of the value). But this cannot be done, so let's suffer this.
-				return compareResult * -1;
+				@SuppressWarnings("unchecked")
+				int compareResult = first.compareTo(second);
+				return compareResult * multiplier;
 			}
 		}
 	}
@@ -279,7 +371,8 @@ public class ReportList extends Table {
 			if(property == null) {
 				return false;
 			}
-			return property.toString().contains(filterValue.toString());
+			Reporter reporter = (Reporter)property.getValue();
+			return reporter != null && reporter.getName().contains(filterValue.toString());
 		}
 
 		@Override
@@ -312,7 +405,7 @@ public class ReportList extends Table {
 			if(this.filterValue == null || !hasFilterValue()) {
 				return true;
 			}
-			Report itemBean = (Report)itemId;
+			WrappedReport itemBean = (WrappedReport)itemId;
 			ReportStatus selectedStatus = this.filterValue.getSelectedStatus();
 			Set<ReportResolution> selectedResolutions = this.filterValue.getSelectedResolutions();
 			
