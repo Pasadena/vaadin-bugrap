@@ -16,6 +16,7 @@ import com.vaadin.incubator.bugrap.model.reports.Report;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinService;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
@@ -112,9 +113,20 @@ public class AddCommentComponent extends CustomComponent {
 		return attachmentList;
 	}
 	
-	private Link createUploadedFileLink(final Comment comment) {
+	private HorizontalLayout createUploadedFileLink(final Comment comment) {
+		HorizontalLayout uploadedFileLayout = new HorizontalLayout();
+		uploadedFileLayout.setSpacing(true);
 		Link attachmentLink = new AttachmentOpener(comment);
-		return attachmentLink;
+		Button deleteAttachmentButton = new Button("", event -> {
+			this.reportAttachments.remove(comment);
+			this.attachmentList.removeComponent(uploadedFileLayout);
+		});
+		deleteAttachmentButton.setIcon(FontAwesome.REMOVE);
+		deleteAttachmentButton.addStyleName(ValoTheme.BUTTON_LINK);
+		deleteAttachmentButton.addStyleName(ValoTheme.BUTTON_SMALL);
+		uploadedFileLayout.addComponents(attachmentLink, deleteAttachmentButton);
+		uploadedFileLayout.setComponentAlignment(attachmentLink, Alignment.MIDDLE_LEFT);
+		return uploadedFileLayout;
 	}
 	
 	private void startUpload(final String fileName) {
@@ -162,11 +174,19 @@ public class AddCommentComponent extends CustomComponent {
 		this.attachmentUpload.setReceiver(new AttachmentReceiver());
 		attachmentUpload.addStartedListener(event -> startUpload(event.getFilename()));
 		
-		Button cancel = new Button("Cancel", event -> this.toggleOpen());
+		Button cancel = new Button("Cancel", event -> this.cancelEdit());
 		cancel.addStyleName(ValoTheme.BUTTON_SMALL);
 		
 		commentActionsLayout.addComponents(addCommentButton, attachmentUpload, cancel);
 		return commentActionsLayout;
+	}
+	
+	private void cancelEdit() {
+		this.toggleOpen();
+		this.commentArea.setValue("");
+		this.addCommentButton.setEnabled(false);
+		this.reportAttachments.clear();
+		this.attachmentList.removeAllComponents();
 	}
 
 	private void toggleOpen() {
