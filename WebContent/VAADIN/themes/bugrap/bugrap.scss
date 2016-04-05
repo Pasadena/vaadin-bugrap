@@ -47,7 +47,10 @@ $v-font-family: "Open Sans", sans-serif;
   }
   
   .main-layout {
-  	padding: 2% 3%;
+  	padding-top: 2%;
+  	padding-bottom: 1%;
+  	padding-left: 3%;
+  	padding-right: 3%;
   }
   
   [class*="margin-top"] > tbody > [class*="firstrow"] > td {
@@ -56,6 +59,12 @@ $v-font-family: "Open Sans", sans-serif;
   
   [class*="margin-bottom"] > tbody > [class*="lastrow"] > td {
     padding-bottom: 1% !important;
+  }
+  
+  .v-table-header {
+  	background-color: blue;
+    color: white;
+    border-radius: 2px;
   }
   
   .view-content {
@@ -77,6 +86,9 @@ $v-font-family: "Open Sans", sans-serif;
   .body-layout {
   	@extend .view-content;
   	min-height: 300px;
+  	overflow: hidden;
+  	box-shadow: 3px 3px 3px #1AB9F0 !important;
+  	background-color: #D9F5FF;
   }
   
   .v-formlayout-captioncell {

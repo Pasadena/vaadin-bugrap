@@ -61,6 +61,7 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		
 		VerticalLayout viewBodyLayout = new VerticalLayout();
 		viewBodyLayout.addStyleName("body-layout");
+		viewBodyLayout.setSizeFull();
 		
 		HorizontalLayout versionSelectLayout = this.getVersionSelectBar();
 		HorizontalLayout tableFiltersLayout = this.getFilterOptionsLayout();
@@ -73,6 +74,10 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		viewBodyLayout.addComponent(versionSelectLayout);
 		viewBodyLayout.addComponent(tableFiltersLayout);
 		viewBodyLayout.addComponent(reportListLayout);
+		
+		viewBodyLayout.setExpandRatio(versionSelectLayout, 1);
+		viewBodyLayout.setExpandRatio(tableFiltersLayout, 1);
+		viewBodyLayout.setExpandRatio(reportListLayout, 8);
 		
 		reportsView.setExpandRatio(headerLayout, 1);
 		reportsView.setExpandRatio(viewBodyLayout, 3);;
