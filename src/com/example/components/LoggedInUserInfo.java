@@ -18,7 +18,9 @@ public class LoggedInUserInfo extends CustomComponent {
 	public LoggedInUserInfo(final Reporter loggedInUser, final Navigator navigator) {
 		
 		GridLayout componentLayout = new GridLayout(2, 1);
-		Label currentUserImage = new Label(FontAwesome.USER.getHtml() + " " +loggedInUser.getName() + "|");
+		componentLayout.setSpacing(true);
+		
+		Label currentUserImage = new Label("Logged in as: " + FontAwesome.USER.getHtml() + " " +loggedInUser.getName());
 		currentUserImage.setContentMode(ContentMode.HTML);
 		currentUserImage.addStyleName("button-aligned-label");
 
@@ -31,10 +33,11 @@ public class LoggedInUserInfo extends CustomComponent {
 
 		componentLayout.addComponent(currentUserImage);
 		componentLayout.addComponent(logoutButton);
-		componentLayout.setSizeUndefined();
 		
+		componentLayout.setSizeUndefined();
 		currentUserImage.setSizeUndefined();
 		logoutButton.setSizeUndefined();
+		
 		setCompositionRoot(componentLayout);
 	}
 
