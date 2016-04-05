@@ -2,6 +2,8 @@ package com.example.components;
 
 import java.util.List;
 
+import com.example.bugrap.constants.SessionAttributeConstants;
+import com.example.bugrap.util.SessionUtils;
 import com.example.events.ProjectSelectedEvent;
 import com.example.events.ProjectVersionSelectedEvent;
 import com.vaadin.data.Container;
@@ -23,10 +25,19 @@ public class ProjectVersionSelectComponent extends NativeSelect {
 		
 		eventRouter.addListener(ProjectSelectedEvent.class, this, "handleProjectChange");
 		this.addValueChangeListener(event -> {
-			eventRouter.fireEvent(new ProjectVersionSelectedEvent(this, (ProjectVersion)event.getProperty().getValue()));
+			ProjectVersion selectedVersion = (ProjectVersion)event.getProperty().getValue();
+			SessionUtils.storeValueToSession(SessionAttributeConstants.SELECTED_VERSION.getAttributeName(), selectedVersion);
+			eventRouter.fireEvent(new ProjectVersionSelectedEvent(this, selectedVersion));
 		});
-		
-		this.selectFirstValue();
+		this.selectStoredOrFirst();
+	}
+	
+	private void selectStoredOrFirst() {
+		if(SessionUtils.containsKey(SessionAttributeConstants.SELECTED_VERSION.getAttributeName())) {
+			this.select(SessionUtils.getValueFromSession(SessionAttributeConstants.SELECTED_VERSION.getAttributeName()));
+		} else {
+			this.selectFirstValue();
+		}
 	}
 	
 	private void setComponentProperties() {
