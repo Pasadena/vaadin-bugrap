@@ -3,6 +3,8 @@ package com.example.bugrap;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 
+import com.example.bugrap.constants.SessionAttributeConstants;
+import com.example.bugrap.util.SessionUtils;
 import com.example.bugrap.views.LoginView;
 import com.example.bugrap.views.ReportsView;
 import com.vaadin.annotations.Theme;
@@ -44,7 +46,7 @@ public class BugrapUI extends UI {
 		
 		navigator.addView("login", LoginView.class);
 		navigator.addView("main", ReportsView.class);
-		if(VaadinService.getCurrentRequest().getWrappedSession().getAttribute("loggedInUser") == null) {
+		if(!SessionUtils.containsKey(SessionAttributeConstants.LOGGED_IN_USER.getAttributeName())) {
 			navigator.navigateTo("login");
 		}
 	}

@@ -5,6 +5,8 @@ import java.util.Map;
 
 import com.example.bugrap.VersionDistributionBar;
 import com.example.bugrap.constants.AssigneeSelections;
+import com.example.bugrap.constants.SessionAttributeConstants;
+import com.example.bugrap.util.SessionUtils;
 import com.example.components.LoggedInUserInfo;
 import com.example.components.ProjectSelectComponent;
 import com.example.components.ProjectVersionSelectComponent;
@@ -24,7 +26,6 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.GridLayout;
@@ -48,12 +49,18 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	@Override
 	public void enter(ViewChangeEvent event) {
 		navigator = event.getNavigator();
+		this.buildViewContent();
 	}
 	
 	public ReportsView() {
-		loggedInUser = (Reporter)VaadinService.getCurrentRequest().getWrappedSession().getAttribute("loggedInUser");
+		loggedInUser = SessionUtils.getValueFromSession(SessionAttributeConstants.LOGGED_IN_USER.getAttributeName());
 		this.setViewProperties();
 		
+		eventRouter.addListener(ReportSelectedEvent.class, this, "setSelectedReport");
+		eventRouter.addListener(CloseSelectedReportEvent.class, this, "removeSelectedReportComponent");
+	}
+	
+	private void buildViewContent() {
 		VerticalLayout reportsView = new VerticalLayout();
 		reportsView.setSizeFull();
 		
@@ -80,12 +87,9 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		viewBodyLayout.setExpandRatio(reportListLayout, 8);
 		
 		reportsView.setExpandRatio(headerLayout, 1);
-		reportsView.setExpandRatio(viewBodyLayout, 3);;
+		reportsView.setExpandRatio(viewBodyLayout, 4);;
 		
 		this.setFirstComponent(reportsView);
-		
-		eventRouter.addListener(ReportSelectedEvent.class, this, "setSelectedReport");
-		eventRouter.addListener(CloseSelectedReportEvent.class, this, "removeSelectedReportComponent");
 	}
 	
 	private void setViewProperties() {

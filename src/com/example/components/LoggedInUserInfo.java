@@ -1,5 +1,7 @@
 package com.example.components;
 
+import com.example.bugrap.constants.SessionAttributeConstants;
+import com.example.bugrap.util.SessionUtils;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.FontAwesome;
@@ -21,7 +23,7 @@ public class LoggedInUserInfo extends CustomComponent {
 		currentUserImage.addStyleName("button-aligned-label");
 
 		final Button logoutButton = new Button("Logout", clickEvent -> {
-			getUI().getSession().setAttribute(Reporter.class, null);
+			SessionUtils.storeValueToSession(SessionAttributeConstants.LOGGED_IN_USER.getAttributeName(), null);
 			navigator.navigateTo("login");
 		});
 		logoutButton.setIcon(FontAwesome.KEY);

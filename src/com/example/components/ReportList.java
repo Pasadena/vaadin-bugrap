@@ -112,7 +112,7 @@ public class ReportList extends Table {
 	}
 	
 	private boolean areMultipleVersionsSelected(final ProjectVersion projectVersion) {
-		return projectVersion.getId() <= 0;
+		return projectVersion != null && projectVersion.getId() <= 0;
 	}
 	
 	private String getImageMatchingPriority(final WrappedReport report) {

@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.example.bugrap.constants.SessionAttributeConstants;
+import com.example.bugrap.util.SessionUtils;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.incubator.bugrap.model.facade.AbstractEntity;
 import com.vaadin.incubator.bugrap.model.facade.FacadeFactory;
@@ -67,8 +69,7 @@ public class LoginView extends VerticalLayout implements View {
 			if(matchingUsers.isEmpty()) {
 				Notification.show("Cannot find user with provided login information!", Notification.TYPE_ERROR_MESSAGE);
 			} else {
-				getUI().getSession().setAttribute(Reporter.class, (Reporter)matchingUsers.get(0));
-				VaadinService.getCurrentRequest().getWrappedSession().setAttribute("loggedInUser", (Reporter)matchingUsers.get(0));
+				SessionUtils.storeValueToSession(SessionAttributeConstants.LOGGED_IN_USER.getAttributeName(), (Reporter)matchingUsers.get(0));
 				navigator.navigateTo("main");
 			}
 		});
