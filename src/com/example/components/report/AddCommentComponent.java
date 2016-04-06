@@ -92,6 +92,7 @@ public class AddCommentComponent extends CustomComponent {
 		commentLayout.setWidth(100, Unit.PERCENTAGE);
 		
 		this.commentArea = new TextArea("Add comment");
+		this.commentArea.setInputPrompt("Add a comment...");
 		commentArea.setWidth(100, Unit.PERCENTAGE);
 		commentArea.setRows(10);
 		commentArea.setImmediate(true);
@@ -214,6 +215,7 @@ public class AddCommentComponent extends CustomComponent {
 		}
 		
 		eventRouter.fireEvent(new CommentCreatedEvent(this, savedComments));
+		this.commentArea.setValue("");
 		this.toggleOpen(); 
 	}
 	
