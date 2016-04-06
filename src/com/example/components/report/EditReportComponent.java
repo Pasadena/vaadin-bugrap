@@ -7,6 +7,7 @@ import com.vaadin.incubator.bugrap.model.reports.Report;
 import com.vaadin.server.BrowserWindowOpener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinService;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
@@ -84,7 +85,9 @@ public class EditReportComponent extends CustomComponent {
 	private HorizontalLayout createHeaderRow(boolean externalMode) {
 		HorizontalLayout header = new HorizontalLayout();
 		if(!externalMode) {
-			header.addComponent(this.createOpenInNewWindowLink());
+			Link openReportLink = this.createOpenInNewWindowLink();
+			header.addComponent(openReportLink);
+			header.setComponentAlignment(openReportLink, Alignment.MIDDLE_CENTER);
 		}
 		
 		Label projectNameField = HtmlUtils.createHeader(this.editableReport.getSummary(), 3);
