@@ -17,6 +17,7 @@ public class MassEditReportsComponent extends CustomComponent {
 		this.eventRouter = eventRouter;
 		VerticalLayout container = new VerticalLayout();
 		container.setSizeUndefined();
+		container.setMargin(true);
 		
 		container.addComponent(HtmlUtils.createHeader("<b>" + selectedReports.size() + " reports selected</b> - Select single  report to view contents", 3));
 		container.addComponent(new ReportActionBar.ActionBarBuilder(this.eventRouter).withReportCollection(selectedReports).build());

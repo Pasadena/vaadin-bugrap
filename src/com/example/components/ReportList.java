@@ -1,11 +1,13 @@
 package com.example.components;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,6 +22,7 @@ import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.DefaultItemSorter;
+import com.vaadin.data.util.converter.Converter;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.EventRouter;
 import com.vaadin.event.ShortcutAction.KeyCode;
@@ -63,7 +66,8 @@ public class ReportList extends Table {
 		this.setTableProperties();
 		
 		this.setContainerDataSource(getReportsContainer(activeVersion));
-
+		this.setConverter("source.timestamp", new DateToFinnishStringConverter());
+		
 		this.registerListeners();
 		this.toggleTableVisibility(activeVersion);
 		this.addGeneratedColumns();
@@ -425,6 +429,39 @@ public class ReportList extends Table {
 		@Override
 		public boolean appliesToProperty(Object propertyId) {
 			return propertyId != null && propertyId.equals(this.propertyId);
+		}
+		
+	}
+	
+	private class DateToFinnishStringConverter implements Converter<String, Date> {
+		
+		private final SimpleDateFormat formatter;
+		
+		public DateToFinnishStringConverter() {
+			this.formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+		}
+
+		@Override
+		public Date convertToModel(String value, Class<? extends Date> targetType, Locale locale)
+				throws com.vaadin.data.util.converter.Converter.ConversionException {
+			return null;
+		}
+
+		@Override
+		public String convertToPresentation(Date value, Class<? extends String> targetType, Locale locale)
+				throws com.vaadin.data.util.converter.Converter.ConversionException {
+			// TODO Auto-generated method stub
+			return formatter.format(value);
+		}
+
+		@Override
+		public Class<Date> getModelType() {
+			return Date.class;
+		}
+
+		@Override
+		public Class<String> getPresentationType() {
+			return String.class;
 		}
 		
 	}
