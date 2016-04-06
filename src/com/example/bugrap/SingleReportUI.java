@@ -28,7 +28,7 @@ public class SingleReportUI extends UI {
 		HorizontalLayout breadCrumbs = this.createBreadcrumb(selectedReport);
 		
 		VerticalLayout content = new VerticalLayout();
-		content.addStyleName("main-layout");
+		content.setMargin(true);
 		content.setSizeUndefined();
 		content.setWidth(100, Unit.PERCENTAGE);
 		

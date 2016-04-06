@@ -26,6 +26,7 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.GridLayout;
@@ -62,14 +63,12 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	
 	private void buildViewContent() {
 		VerticalLayout reportsView = new VerticalLayout();
-		reportsView.setSizeFull();
+		reportsView.setMargin(true);
 		
 		GridLayout headerLayout = this.getViewHeaderLayout();
 		
 		VerticalLayout viewBodyLayout = new VerticalLayout();
 		viewBodyLayout.addStyleName("body-layout");
-		viewBodyLayout.setWidth(99, Unit.PERCENTAGE);
-		viewBodyLayout.setHeight(99, Unit.PERCENTAGE);
 		
 		HorizontalLayout versionSelectLayout = this.getVersionSelectBar();
 		HorizontalLayout tableFiltersLayout = this.getFilterOptionsLayout();
@@ -89,14 +88,12 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		
 		reportsView.setExpandRatio(headerLayout, 1);
 		reportsView.setExpandRatio(viewBodyLayout, 4);;
-		
+
 		this.setFirstComponent(reportsView);
 	}
 	
 	private void setViewProperties() {
-		this.setSizeFull();
 		this.updateSplitPosition(100, true);
-		this.addStyleName("main-layout");
 	}
 	
 	private void updateSplitPosition(float percents, boolean locked) {
@@ -130,8 +127,9 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	
 	private GridLayout getViewHeaderLayout() {
 		final GridLayout headerLayout = new GridLayout(2, 2);
-		headerLayout.setWidth(99, Unit.PERCENTAGE);
+		headerLayout.setWidth(100, Unit.PERCENTAGE);
 		headerLayout.addStyleName("header-layout");
+		headerLayout.setMargin(new MarginInfo(false, false, true, false));
 		
 		LoggedInUserInfo userInfo = new LoggedInUserInfo(loggedInUser, navigator);
 		userInfo.setSizeUndefined();
