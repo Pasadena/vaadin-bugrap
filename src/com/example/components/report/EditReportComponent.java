@@ -48,14 +48,22 @@ public class EditReportComponent extends CustomComponent {
 
 		setContainerProperties();
 		
-		container.addComponent(this.createHeaderRow(externalMode));
-		container.addComponent(new ReportActionBar.ActionBarBuilder(this.eventRouter).withSingleReport(this.editableReport).build());
-		container.addComponent(new ReportCommentListComponent(this.editableReport, this.eventRouter));
-		container.addComponent(new AddCommentComponent(this.editableReport, this.eventRouter));
+		HorizontalLayout header = this.createHeaderRow(externalMode);
+		ReportActionBar editActions = new ReportActionBar.ActionBarBuilder(this.eventRouter).withSingleReport(this.editableReport).build();
+		ReportCommentListComponent commentSection = new ReportCommentListComponent(this.editableReport, this.eventRouter);
+		AddCommentComponent addCommentSection = new AddCommentComponent(this.editableReport, this.eventRouter);
+		
+		container.addComponents(header, editActions, commentSection, addCommentSection);
+		
+		container.setExpandRatio(header, 0.1f);
+		container.setExpandRatio(editActions, 0.2f);
+		container.setExpandRatio(commentSection, 0.2f);
+		container.setExpandRatio(addCommentSection, 0.5f);
 		
 		this.eventRouter.addListener(ReloadReportEvent.class, this, "reloadReport");
-		
-		setSizeUndefined();
+
+		this.setSizeUndefined();
+		this.setWidth(100, Unit.PERCENTAGE);
 		setCompositionRoot(container);
 	}
 	
@@ -69,7 +77,8 @@ public class EditReportComponent extends CustomComponent {
 		container.setSizeUndefined();
 		container.setSpacing(true);
 		container.setMargin(true);
-		container.addStyleName("no-horizontal-padding");
+		container.addStyleName("content-padding");
+		this.container.setSizeFull();
 	}
 	
 	private HorizontalLayout createHeaderRow(boolean externalMode) {

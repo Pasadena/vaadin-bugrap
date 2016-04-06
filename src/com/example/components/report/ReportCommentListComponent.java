@@ -35,7 +35,7 @@ public class ReportCommentListComponent extends CustomComponent {
 	public ReportCommentListComponent(final Report report, final EventRouter eventRouter) {
 		this.report = report;
 		this.commentListLayout = new VerticalLayout();
-		this.commentListLayout.setWidth(100, Unit.PERCENTAGE);
+		this.commentListLayout.setWidth(98, Unit.PERCENTAGE);
 		
 		List<VerticalLayout> comments = this.createComments(this.report);
 		this.commentListLayout.addComponents(comments.toArray(new VerticalLayout[comments.size()]));
@@ -90,6 +90,7 @@ public class ReportCommentListComponent extends CustomComponent {
 	
 	private Label createCommentTextArea(final Comment comment) {
 		Label commentArea = new Label();
+		commentArea.setWidth(96, Unit.PERCENTAGE);
 		commentArea.setValue(comment.getType() == CommentType.COMMENT ? comment.getComment() : comment.getAttachmentName());
 		commentArea.setContentMode(ContentMode.HTML);
 		commentArea.addStyleName("body");

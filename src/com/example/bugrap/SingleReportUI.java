@@ -29,12 +29,10 @@ public class SingleReportUI extends UI {
 		
 		VerticalLayout content = new VerticalLayout();
 		content.addStyleName("main-layout");
+		content.setSizeUndefined();
+		content.setWidth(100, Unit.PERCENTAGE);
 		
 		content.addComponents(breadCrumbs, singleReportView);
-		
-		content.setExpandRatio(breadCrumbs, 0.1f);
-		content.setExpandRatio(singleReportView, 0.9f);
-		
 		setContent(content);
 		
 	}
@@ -44,12 +42,17 @@ public class SingleReportUI extends UI {
 		breadCrumbLayout.setSpacing(true);
 		
 		Label projectNameField = HtmlUtils.createHeader(report.getProject().getName(), 2);
-		Label versionNameField = HtmlUtils.createHeader(report.getVersion().getVersion(), 2);
-		Label arrow = HtmlUtils.createHeader(FontAwesome.ARROW_RIGHT.getHtml(), 2);
-		
-		breadCrumbLayout.addComponents(projectNameField, arrow, versionNameField);
-		
-		return breadCrumbLayout;
+		if(report.getVersion() == null) {
+			breadCrumbLayout.addComponent(projectNameField);
+			return breadCrumbLayout;
+		} else {
+			Label versionNameField = HtmlUtils.createHeader(report.getVersion().getVersion(), 2);
+			Label arrow = HtmlUtils.createHeader(FontAwesome.ARROW_RIGHT.getHtml(), 2);
+			
+			breadCrumbLayout.addComponents(projectNameField, arrow, versionNameField);
+			
+			return breadCrumbLayout;
+		}
 	}
 
 }

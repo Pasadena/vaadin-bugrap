@@ -93,6 +93,7 @@ public class AddCommentComponent extends CustomComponent {
 		
 		this.commentArea = new TextArea("Add comment");
 		commentArea.setWidth(100, Unit.PERCENTAGE);
+		commentArea.setRows(10);
 		commentArea.setImmediate(true);
 		commentArea.addTextChangeListener(event -> toggleCommentButtonEnabled(event.getText()));
 		commentLayout.addComponent(commentArea);
