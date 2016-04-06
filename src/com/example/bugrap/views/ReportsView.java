@@ -33,6 +33,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.NativeSelect;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 
@@ -176,8 +177,10 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	
 	private VerticalLayout getReportsSection() {
 		VerticalLayout reportSection = new VerticalLayout();
+		Panel listWrapper = new Panel();
 		ReportList reportList = new ReportList(null, eventRouter, (ProjectVersion)versionSelect.getValue());
-		reportSection.addComponent(reportList);
+		listWrapper.setContent(reportList);
+		reportSection.addComponent(listWrapper);
 		return reportSection;
 	}
 	

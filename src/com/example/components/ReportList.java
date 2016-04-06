@@ -241,7 +241,11 @@ public class ReportList extends Table {
 		this.addShortcutListener(new ShortcutListener("", KeyCode.ENTER, new int[10]) {
 			@Override
 			public void handleAction(Object sender, Object target) {
-				//eventRouter.fireEvent(new ReportSelectedEvent(ReportList.this, (Report)getValue()));
+				@SuppressWarnings("unchecked")
+				Set<WrappedReport> selectedReports = (Set<WrappedReport>)getValue();
+				if(selectedReports.size() == 1) {
+					openSelectedReportInNewWindow(selectedReports.iterator().next().getSource());
+				}
 			}
 		});
 	}
