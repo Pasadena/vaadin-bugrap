@@ -176,7 +176,7 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	
 	private VerticalLayout getReportsSection() {
 		VerticalLayout reportSection = new VerticalLayout();
-		ReportList reportList = new ReportList("", eventRouter, (ProjectVersion)versionSelect.getValue());
+		ReportList reportList = new ReportList(null, eventRouter, (ProjectVersion)versionSelect.getValue());
 		reportSection.addComponent(reportList);
 		return reportSection;
 	}
