@@ -19,6 +19,7 @@ import com.vaadin.incubator.bugrap.model.reports.Comment;
 import com.vaadin.incubator.bugrap.model.reports.CommentType;
 import com.vaadin.incubator.bugrap.model.reports.Report;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Label;
@@ -36,6 +37,7 @@ public class ReportCommentListComponent extends CustomComponent {
 		this.report = report;
 		this.commentListLayout = new VerticalLayout();
 		this.commentListLayout.setWidth(98, Unit.PERCENTAGE);
+		this.commentListLayout.setMargin(new MarginInfo(true, false, false, false));
 		
 		List<VerticalLayout> comments = this.createComments(this.report);
 		this.commentListLayout.addComponents(comments.toArray(new VerticalLayout[comments.size()]));

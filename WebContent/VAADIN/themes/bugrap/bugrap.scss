@@ -27,6 +27,9 @@ $v-shadow-opacity: 5%;
 // For more information, see: https://vaadin.com/book/-/page/themes.valo.html
 // Example variants can be copy/pasted from https://vaadin.com/wiki/-/wiki/Main/Valo+Examples
 
+$layout-color: #D9F5FF;
+$layout-shadow: 3px 3px 3px #1AB9F0;
+
 @import "../valo/valo.scss";
 
 @mixin bugrap {
@@ -83,8 +86,8 @@ $v-shadow-opacity: 5%;
   .header-layout {
   	@extend .view-content;
   	margin-bottom: 1%;
-  	background-color: #D9F5FF;
-    box-shadow: 3px 3px 3px #1AB9F0;
+  	background-color: $layout-color;
+    box-shadow: $layout-shadow;
   	.no-padding {
   		padding: 0px !important;
   	}
@@ -94,8 +97,8 @@ $v-shadow-opacity: 5%;
   	@extend .view-content;
   	min-height: 300px;
   	overflow: hidden;
-  	box-shadow: 3px 3px 3px #1AB9F0 !important;
-  	background-color: #D9F5FF;
+  	box-shadow: $layout-shadow;
+  	background-color: $layout-color;
   }
   
   .v-formlayout-captioncell {
@@ -124,13 +127,17 @@ $v-shadow-opacity: 5%;
   	margin-left: 2%;
   	margin-bottom: 2%;
   	background-color: white;
+  	box-shadow: 4px 4px 10px grey;
   	
   	.header {
-  		color: lightgrey;
+  		color: grey;
+  		padding-left: 5px;
+  		padding-top: 3px;
   	}
   	
   	.body {
   		margin-left: 2%;
+  		padding-bottom: 3px;
   	}
   }
   

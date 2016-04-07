@@ -28,6 +28,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class ReportActionBar extends HorizontalLayout {
@@ -126,6 +127,7 @@ public class ReportActionBar extends HorizontalLayout {
 		
 		revertButton.addStyleName("danger bottom-aligned");
 		updateButton.addStyleName("primary bottom-aligned");
+		revertButton.addStyleName(ValoTheme.BUTTON_SMALL);
 		
 		this.addComponents(updateButton, revertButton);
 	}
