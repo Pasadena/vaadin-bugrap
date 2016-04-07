@@ -51,7 +51,7 @@ $layout-shadow: 3px 3px 3px #1AB9F0;
   }
   
   .input-large {
-  	min-width: 300px;
+  	min-width: 400px;
   }
   
   [class*="margin-top"] > tbody > [class*="firstrow"] > td {
@@ -60,6 +60,10 @@ $layout-shadow: 3px 3px 3px #1AB9F0;
   
   [class*="margin-bottom"] > tbody > [class*="lastrow"] > td {
     padding-bottom: 1% !important;
+  }
+  
+  .v-csslayout input {
+  	float: right;
   }
   
   .report-edit-select select {

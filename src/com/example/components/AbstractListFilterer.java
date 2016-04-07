@@ -23,7 +23,7 @@ public abstract class AbstractListFilterer extends CustomComponent {
 
 		this.container = new CssLayout();
 		this.container.setSizeUndefined();
-		
+		this.container.setWidth(100,  Unit.PERCENTAGE);
 		this.setCompositionRoot(this.container);
 	}
 	
