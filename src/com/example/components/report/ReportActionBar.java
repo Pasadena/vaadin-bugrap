@@ -22,6 +22,7 @@ import com.vaadin.incubator.bugrap.model.reports.ReportStatus;
 import com.vaadin.incubator.bugrap.model.reports.ReportType;
 import com.vaadin.incubator.bugrap.model.users.Reporter;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
@@ -31,7 +32,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class ReportActionBar extends HorizontalLayout {
+public abstract class ReportActionBar extends HorizontalLayout {
 	
 	public static class ActionBarBuilder {
 		
@@ -69,8 +70,12 @@ public class ReportActionBar extends HorizontalLayout {
 	protected NativeSelect statusSelect;
 	protected NativeSelect assigneeSelect;
 	
+	protected Button updateButton;
+	protected Button revertButton;
+	
 	private final EventRouter eventRouter;
 	
+	protected abstract BeanFieldGroup<?> getFieldGroup();
 	protected void saveChanges() {}
 	protected void discardChanges() {}
 	protected List<ProjectVersion> getVersions() { return new ArrayList<ProjectVersion>(); }
@@ -118,16 +123,30 @@ public class ReportActionBar extends HorizontalLayout {
 		this.versionSelect = new NativeSelect("Version", this.getVersions());
 		this.versionSelect.addStyleName("report-edit-select");
 		
+		this.addSelectChangeListeners(Arrays.asList(prioritySelect, typeSelect, statusSelect, assigneeSelect, versionSelect));
+		
 		this.addComponents(prioritySelect, typeSelect, statusSelect, assigneeSelect, versionSelect);
+	}
+	
+	private void addSelectChangeListeners(List<AbstractSelect> components) {
+		components.stream().forEach(component -> component.addValueChangeListener(event -> {
+			if(this.getFieldGroup().isModified()) {
+				this.updateButton.setEnabled(true);
+				this.revertButton.setEnabled(true);
+			}
+		}));
 	}
 		
 	private void createActionBarButtons() {
-		Button updateButton = new Button("Update", event -> this.saveAndClose());
-		Button revertButton = new Button("Revert", event -> this.discardAndClose());
+		this.updateButton = new Button("Update", event -> this.saveAndClose());
+		this.revertButton = new Button("Revert", event -> this.discardAndClose());
 		
-		revertButton.addStyleName("danger bottom-aligned");
-		updateButton.addStyleName("primary bottom-aligned");
-		revertButton.addStyleName(ValoTheme.BUTTON_SMALL);
+		this.revertButton.addStyleName("danger bottom-aligned");
+		this.revertButton.addStyleName(ValoTheme.BUTTON_SMALL);
+		this.revertButton.setEnabled(false);
+		
+		this.updateButton.addStyleName("primary bottom-aligned");
+		this.updateButton.setEnabled(false);
 		
 		this.addComponents(updateButton, revertButton);
 	}
@@ -194,6 +213,11 @@ public class ReportActionBar extends HorizontalLayout {
 			fieldGroup.bind(statusSelect, "status");
 			fieldGroup.bind(assigneeSelect, "assigned");
 			fieldGroup.bind(versionSelect, "version");
+		}
+
+		@Override
+		protected BeanFieldGroup<?> getFieldGroup() {
+			return this.fieldGroup;
 		}
 	}
 
@@ -267,6 +291,11 @@ public class ReportActionBar extends HorizontalLayout {
 			fieldGroup.bind(statusSelect, "sharedStatus");
 			fieldGroup.bind(assigneeSelect, "sharedAssignee");
 			fieldGroup.bind(versionSelect, "sharedVersion");
+		}
+		
+		@Override
+		protected BeanFieldGroup<?> getFieldGroup() {
+			return this.fieldGroup;
 		}
 		
 		public class ReportListValueHolder {
