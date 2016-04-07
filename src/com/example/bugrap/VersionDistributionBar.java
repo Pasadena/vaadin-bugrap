@@ -21,9 +21,11 @@ import com.vaadin.incubator.bugrap.model.reports.ReportStatus;
 public class VersionDistributionBar extends com.vaadin.ui.AbstractComponent {
 	
 	private Map<ReportDistributionGroup, Long> distributions;
+	private ProjectVersion selectedVersion;
 
 	public VersionDistributionBar(final EventRouter eventRouter, final ProjectVersion selectedVersion) {
 		this.distributions = new HashMap<>();
+		this.selectedVersion = selectedVersion;
 		this.updateVersionDistributions(selectedVersion);
 		
 		eventRouter.addListener(ProjectVersionSelectedEvent.class, this, "handleProjectVersionChange");
@@ -41,11 +43,11 @@ public class VersionDistributionBar extends com.vaadin.ui.AbstractComponent {
 	}
 	
 	public void handleUpdatedReport(final ReportUpdatedEvent event) {
-		this.updateVersionDistributions(event.getUpdatedReport().getVersion());
+		this.updateVersionDistributions(this.selectedVersion);
 	}
 	
 	public void handleUpdatedReports(final ReportListUpdatedEvent event) {
-		this.updateVersionDistributions(event.getUpdatedReports().iterator().next().getVersion());
+		this.updateVersionDistributions(this.selectedVersion);
 	}
 	
 	private void updateVersionDistributions(final ProjectVersion projectVersion) {

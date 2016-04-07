@@ -62,6 +62,7 @@ public class ReportList extends Table {
 	public ReportList(String title, EventRouter eventRouter, final ProjectVersion activeVersion) {
 		super(title);
 		this.eventRouter = eventRouter;
+		this.selectedVersion = activeVersion;
 		
 		this.setTableProperties();
 		
@@ -218,6 +219,9 @@ public class ReportList extends Table {
 	}
 	
 	private void refreshTableAfterUpdate() {
+		this.setContainerDataSource(this.getReportsContainer(this.selectedVersion));
+		this.setTableSorting(this.areMultipleVersionsSelected(this.selectedVersion));
+		this.toggleTableVisibility(this.selectedVersion);
 		this.refreshRowCache();
 		this.setValue(null);
 		this.sort();
