@@ -210,7 +210,7 @@ public class ReportList extends Table {
 	
 	public void updateRows(final ReportListUpdatedEvent event) {
 		for(Report report: event.getUpdatedReports()) {
-			if(!report.getVersion().equals(this.selectedVersion)) {
+			if(report.getVersion() != null && !report.getVersion().equals(this.selectedVersion)) {
 				this.reportContainer.removeItem(report);
 			}
 		}

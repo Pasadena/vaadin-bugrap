@@ -235,11 +235,22 @@ public class ReportActionBar extends HorizontalLayout {
 		}
 		
 		private Report populateReportData(final Report target) {
-			target.setPriority(this.valueHolder.getSharedPriority());
-			target.setType(this.valueHolder.getSharedType());
-			target.setStatus(this.valueHolder.getSharedStatus());
-			target.setAssigned(this.valueHolder.getSharedAssignee());
-			target.setVersion(this.valueHolder.getSharedVersion());
+			if(this.valueHolder.getSharedPriority() != null) {
+				target.setPriority(this.valueHolder.getSharedPriority());				
+			}
+			if(this.valueHolder.getSharedType() != null) {
+				target.setType(this.valueHolder.getSharedType());				
+			}
+			if(this.valueHolder.getSharedStatus() != null) {
+				target.setStatus(this.valueHolder.getSharedStatus());				
+			}
+			if(this.valueHolder.getSharedAssignee() != null) {
+				target.setAssigned(this.valueHolder.getSharedAssignee());				
+			}
+			if(this.valueHolder.getSharedVersion() != null) {
+				target.setVersion(this.valueHolder.getSharedVersion());				
+			}
+			
 			return target;
 		}
 		
