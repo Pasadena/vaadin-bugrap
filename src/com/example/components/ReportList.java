@@ -197,7 +197,7 @@ public class ReportList extends Table {
 		} else if(filterChangedEvent.getFilterName().equals("status")) {
 			this.reportContainer.addContainerFilter(new StatusFilter(filterChangedEvent.getFilterName(), filterChangedEvent.getFilterValue()));
 		} else {
-			this.reportContainer.addContainerFilter(new SimpleStringFilter(filterChangedEvent.getFilterName(), filterChangedEvent.getFilterValue().toString(), true, true));
+			this.reportContainer.addContainerFilter(new SimpleStringFilter(filterChangedEvent.getFilterName(), filterChangedEvent.getFilterValue().toString(), true, false));
 		}
 	}
 	
