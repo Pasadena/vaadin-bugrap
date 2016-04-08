@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -241,7 +240,6 @@ public class AddCommentComponent extends CustomComponent {
 	
 	private void addSaveNotifications(List<Comment> successEntities, List<Comment> failedEntities) {
 		failedEntities.forEach(item -> this.addSaveFailedNotifications(item));
-		Set<CommentType> savedCommentTypes = successEntities.stream().map(item -> item.getType()).collect(Collectors.toSet());
 		Map<CommentType, Long> commentsByType = successEntities.stream().collect(Collectors.groupingBy(item -> item.getType(), Collectors.counting()));
 		if(commentsByType.keySet().size() > 1) {
 			Notification.show("Comment and attachments saved succesfully!", Notification.Type.TRAY_NOTIFICATION);
