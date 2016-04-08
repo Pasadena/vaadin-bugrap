@@ -26,8 +26,6 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.FormLayout;
@@ -67,11 +65,13 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	private void buildViewContent() {
 		VerticalLayout reportsView = new VerticalLayout();
 		reportsView.setMargin(true);
+		reportsView.setHeight(100, Unit.PERCENTAGE);
 		
 		GridLayout headerLayout = this.getViewHeaderLayout();
 		
 		VerticalLayout viewBodyLayout = new VerticalLayout();
 		viewBodyLayout.addStyleName("body-layout");
+		viewBodyLayout.setSizeFull();
 		
 		HorizontalLayout versionSelectLayout = this.getVersionSelectBar();
 		HorizontalLayout tableFiltersLayout = this.getFilterOptionsLayout();
@@ -96,6 +96,7 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	}
 	
 	private void setViewProperties() {
+		this.setHeight(100, Unit.PERCENTAGE);
 		this.updateSplitPosition(100, true);
 	}
 	
@@ -113,7 +114,7 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	}
 		
 	private void addEditReportComponentToView(final ReportSelectedEvent event) {
-		this.updateSplitPosition(60, false);
+		this.updateSplitPosition(70, false);
 		VerticalLayout reportEditontainer = new VerticalLayout();
 		reportEditontainer.setMargin(true);
 		reportEditontainer.setSizeUndefined();
@@ -139,12 +140,12 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		final GridLayout headerLayout = new GridLayout(2, 2);
 		headerLayout.setWidth(100, Unit.PERCENTAGE);
 		headerLayout.addStyleName("header-layout");
-		headerLayout.setMargin(new MarginInfo(false, false, true, false));
 		
 		LoggedInUserInfo userInfo = new LoggedInUserInfo(loggedInUser, navigator);
 		userInfo.setSizeUndefined();
 
 		HorizontalLayout linksLayout = this.createHeaderLinksLayout();
+		linksLayout.setHeightUndefined();
 		
 		headerLayout.addComponent(this.createProjectSelectLayout(), 0, 0);
 		headerLayout.addComponent(userInfo, 1, 0);
@@ -186,7 +187,9 @@ public class ReportsView extends VerticalSplitPanel implements View {
 	
 	private VerticalLayout getReportsSection() {
 		VerticalLayout reportSection = new VerticalLayout();
+		reportSection.setSizeFull();
 		Panel listWrapper = new Panel();
+		listWrapper.setSizeFull();
 		ReportList reportList = new ReportList(null, eventRouter, (ProjectVersion)versionSelect.getValue());
 		listWrapper.setContent(reportList);
 		reportSection.addComponent(listWrapper);
