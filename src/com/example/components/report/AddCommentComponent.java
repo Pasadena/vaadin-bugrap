@@ -4,6 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -38,6 +41,9 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class AddCommentComponent extends CustomComponent {
+
+	private static final String COMMENT_SAVE_FAILED_MESSAGE = "Failed to save comment! Please try again later";
+	private static final String ATTACHMENT_SAVE_FAILED_MESSAGE = "Failed to save attachment %s!";
 	
 	private boolean isOpen;
 	
@@ -118,11 +124,14 @@ public class AddCommentComponent extends CustomComponent {
 	private HorizontalLayout createUploadedFileLink(final Comment comment) {
 		HorizontalLayout uploadedFileLayout = new HorizontalLayout();
 		uploadedFileLayout.setSpacing(true);
+		uploadedFileLayout.setId("uploadedFile");
 		Link attachmentLink = new AttachmentOpener(comment);
 		Button deleteAttachmentButton = new Button("", event -> {
 			this.reportAttachments.remove(comment);
 			this.attachmentList.removeComponent(uploadedFileLayout);
+			this.attachmentUpload.setEnabled(!this.reportAttachments.isEmpty());
 		});
+		deleteAttachmentButton.setDescription("Delete attachment");
 		deleteAttachmentButton.setIcon(FontAwesome.REMOVE);
 		deleteAttachmentButton.addStyleName(ValoTheme.BUTTON_LINK);
 		deleteAttachmentButton.addStyleName(ValoTheme.BUTTON_SMALL);
@@ -203,20 +212,58 @@ public class AddCommentComponent extends CustomComponent {
 	
 	private void addComment() {
 		List<Comment> savedComments = new ArrayList<>();
+		List<Comment> failedComments = new ArrayList<>();
 		if(!this.reportAttachments.isEmpty()) {
 			for(Comment comment: this.reportAttachments) {
-				savedComments.add(FacadeUtil.store(comment));
+				tryCommentSave(comment, savedComments, failedComments);
 			}
 		}
 		if(!StringUtils.isBlank(this.commentArea.getValue())) {
 			Comment comment = this.createSkeletonComment(CommentType.COMMENT);
 			comment.setComment(this.commentArea.getValue());
-			savedComments.add(FacadeUtil.store(comment));
+			tryCommentSave(comment, savedComments, failedComments);
 		}
 		
+		this.addSaveNotifications(savedComments, failedComments);
 		eventRouter.fireEvent(new CommentCreatedEvent(this, savedComments));
 		this.commentArea.setValue("");
 		this.toggleOpen(); 
+	}
+	
+	private void tryCommentSave(Comment toBeSavedEntity, List<Comment> successEntitites, List<Comment> failedEntities) {
+		Comment savedEntity = FacadeUtil.store(toBeSavedEntity);
+		if(savedEntity.getId() < 1) {
+			failedEntities.add(savedEntity);
+		} else {
+			successEntitites.add(savedEntity);
+		}
+	}
+	
+	private void addSaveNotifications(List<Comment> successEntities, List<Comment> failedEntities) {
+		failedEntities.forEach(item -> this.addSaveFailedNotifications(item));
+		Set<CommentType> savedCommentTypes = successEntities.stream().map(item -> item.getType()).collect(Collectors.toSet());
+		Map<CommentType, Long> commentsByType = successEntities.stream().collect(Collectors.groupingBy(item -> item.getType(), Collectors.counting()));
+		if(commentsByType.keySet().size() > 1) {
+			Notification.show("Comment and attachments saved succesfully!", Notification.Type.TRAY_NOTIFICATION);
+		} else {
+			Notification.show(getFormattedSingleCommentTypeMessage(commentsByType.entrySet().iterator().next()), Notification.Type.TRAY_NOTIFICATION);
+		}
+	}
+	
+	private String getFormattedSingleCommentTypeMessage(Map.Entry<CommentType, Long> commentTypeEntry) {
+		String commentTypeName = commentTypeEntry.getKey() == CommentType.ATTACHMENT ? "Attachment" : "Comment";
+		if(commentTypeEntry.getValue() > 1) {
+			commentTypeName += "s";
+		}
+		return String.format("%s saved succesfully!", commentTypeName);
+	}
+	
+	private void addSaveFailedNotifications(final Comment comment) {
+		if(comment.getType() == CommentType.ATTACHMENT) {
+			Notification.show(String.format(ATTACHMENT_SAVE_FAILED_MESSAGE, comment.getAttachmentName()), Notification.Type.ERROR_MESSAGE);
+		} else {
+			Notification.show(COMMENT_SAVE_FAILED_MESSAGE, Notification.Type.ERROR_MESSAGE);	
+		}
 	}
 	
 	private Comment createSkeletonComment(final CommentType commentType) {
