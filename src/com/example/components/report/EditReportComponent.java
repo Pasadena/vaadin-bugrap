@@ -78,7 +78,7 @@ public class EditReportComponent extends CustomComponent {
 		container.setSizeUndefined();
 		container.setSpacing(true);
 		container.setMargin(true);
-		container.addStyleName("content-padding");
+		container.addStyleName("body-layout");
 		this.container.setSizeFull();
 	}
 	

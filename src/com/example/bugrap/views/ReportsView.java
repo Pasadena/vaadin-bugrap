@@ -26,8 +26,10 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
@@ -112,11 +114,18 @@ public class ReportsView extends VerticalSplitPanel implements View {
 		
 	private void addEditReportComponentToView(final ReportSelectedEvent event) {
 		this.updateSplitPosition(60, false);
+		VerticalLayout reportEditontainer = new VerticalLayout();
+		reportEditontainer.setMargin(true);
+		reportEditontainer.setSizeUndefined();
+		reportEditontainer.setWidth(100, Unit.PERCENTAGE);
+		Component editReportComponent = null;
 		if(event.getSelectedReports().size() <= 1) {
-			this.replaceComponent(this.getSecondComponent(), new EditReportComponent(eventRouter, event.getSelectedReports().iterator().next(), false));
+			editReportComponent = new EditReportComponent(eventRouter, event.getSelectedReports().iterator().next(), false);
 		} else {
-			this.replaceComponent(this.getSecondComponent(), new MassEditReportsComponent(event.getSelectedReports(), this.eventRouter));
+			editReportComponent = new MassEditReportsComponent(event.getSelectedReports(), this.eventRouter);
 		}
+		reportEditontainer.addComponent(editReportComponent);
+		this.replaceComponent(this.getSecondComponent(), reportEditontainer);
 	}
 	
 	public void removeSelectedReportComponent(final CloseSelectedReportEvent event) {
