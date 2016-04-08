@@ -22,7 +22,7 @@ $v-shadow-opacity: 5%;
 // Defines colors for indicating status (focus, success, failure)
 //$v-focus-color: valo-focus-color(); // Calculates a suitable color automatically
 //$v-friendly-color: #2c9720;
-//$v-error-indicator-color: #ed473b;
+$v-error-indicator-color: #ed473b;
 
 // For more information, see: https://vaadin.com/book/-/page/themes.valo.html
 // Example variants can be copy/pasted from https://vaadin.com/wiki/-/wiki/Main/Valo+Examples
@@ -143,6 +143,23 @@ $layout-shadow: 3px 3px 3px #1AB9F0;
   		margin-left: 2%;
   		padding-bottom: 3px;
   	}
+  }
+  
+  #uploadedFile:hover {
+  	background-color: lightgrey;
+    border: 1px solid grey;
+    border-radius: 4px;
+    padding-left: 7px;
+    box-shadow: inset 0 0 2px grey;
+    //transform: scale(1.2, 1.2);
+  }
+  
+  #uploadedFile .v-button-link {
+  	color: #ed473b;
+  }
+  
+  #uploadedFile .v-button-link:hover {
+  	transform: scale(1.5, 1.5);
   }
   
   .v-csslayout .v-captiontext {
